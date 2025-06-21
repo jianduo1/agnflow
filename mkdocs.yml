@@ -1,0 +1,44 @@
+site_name: agnflow
+site_description: 一个简洁的 Python 智能体工作流引擎
+site_author: jianduo1
+site_url: https://github.com/jianduo1/agnflow
+
+repo_name: jianduo1/agnflow
+repo_url: https://github.com/jianduo1/agnflow
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - minify:
+      minify_html: true
+
+nav:
+  - 首页: index.md
+  - 快速开始: getting-started.md
+  - API 参考: api.md 

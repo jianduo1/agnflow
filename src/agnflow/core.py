@@ -79,12 +79,24 @@ class Node(Conn):
     def _exec(self, state):
         for self.cur_retry in range(self.max_retries):  # 重试机制
             try:
-                # 如果exec函数有state参数，则直接调用exec(state=state)
-                if "state" in self.exec.__code__.co_varnames:
-                    return self.exec(state=state)
-                # 否则，根据exec函数的指定参数名，从state中获取参数
-                else:
-                    return self.exec(**{k: state[k] for k in self.exec.__code__.co_varnames if k != "self" and k in state})
+                # 获取函数参数名
+                func_params = self.exec.__code__.co_varnames
+                # 过滤掉self参数
+                func_params = [p for p in func_params if p != "self"]
+                
+                # 构建调用参数
+                call_kwargs = {}
+                
+                # 如果有state参数，直接传递整个state
+                if "state" in func_params:
+                    call_kwargs["state"] = state
+                
+                # 对于其他参数，从state中获取对应的值
+                for param in func_params:
+                    if param != "state" and param in state:
+                        call_kwargs[param] = state[param]
+                
+                return self.exec(**call_kwargs)
 
             except Exception as e:
                 if self.cur_retry == self.max_retries - 1:
@@ -95,12 +107,24 @@ class Node(Conn):
     async def _aexec(self, state):
         for self.cur_retry in range(self.max_retries):  # 重试机制
             try:
-                # 如果exec函数有state参数，则直接调用exec(state=state)
-                if "state" in self.aexec.__code__.co_varnames:
-                    return await self.aexec(state=state)
-                # 否则，根据exec函数的指定参数名，从state中获取参数
-                else:
-                    return await self.aexec(**{k: state[k] for k in self.aexec.__code__.co_varnames if k != "self" and k in state})
+                # 获取函数参数名
+                func_params = self.aexec.__code__.co_varnames
+                # 过滤掉self参数
+                func_params = [p for p in func_params if p != "self"]
+                
+                # 构建调用参数
+                call_kwargs = {}
+                
+                # 如果有state参数，直接传递整个state
+                if "state" in func_params:
+                    call_kwargs["state"] = state
+                
+                # 对于其他参数，从state中获取对应的值
+                for param in func_params:
+                    if param != "state" and param in state:
+                        call_kwargs[param] = state[param]
+                
+                return await self.aexec(**call_kwargs)
 
             except Exception as e:
                 if self.cur_retry == self.max_retries - 1:

@@ -1,10 +1,16 @@
-# agnflow
+<div align="center">
+  <h1>agnflow</h1>
+  <strong>一个简洁的 Python 智能体工作流引擎</strong>
+  <br>
+  <p>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
+    <a href="https://jianduo1.github.io/agnflow/"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Docs"></a>
+    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/pypi/v/agnflow.svg" alt="PyPI"></a>
+    <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
+  </p>
+</div>
 
 中文 | [English](README_en.md)
-
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Docs: Latest](https://img.shields.io/badge/docs-latest-blue.svg)
-
-一个简洁的 Python 工作流引擎，支持同步与异步节点、分支、循环、流程图渲染。
 
 **agnflow** 追求极简、易用、可扩展，适合快速原型、定制化 LLM 工作流、Agent 任务流等场景。
 
@@ -42,6 +48,12 @@ rye add agnflow
 
 # 使用 poetry 安装
 poetry add agnflow
+
+# 安装特定版本
+pip install agnflow==0.1.0
+
+# 安装最新开发版本
+pip install --upgrade agnflow
 ```
 
 ### 3.2 从源码安装
@@ -175,11 +187,205 @@ flow.render_dot(saved_file="./flow.png")      # 保存dot格式图片
 flow.render_mermaid(saved_file="./flow.png")  # 保存mermaid格式图片
 ```
 
-## 5. 节点连接语法
+## 5. 节点函数详解
+
+### 5.1 函数入参方式
+
+agnflow 支持多种函数入参方式，会根据函数签名自动从状态中获取参数：
+
+#### 方式 1: 接收整个状态
+```python
+def my_node(state):
+    """接收整个状态字典"""
+    print(f"收到状态: {state}")
+    return {"result": "processed"}
+
+n1 = Node("my_node", exec=my_node)
+```
+
+#### 方式 2: 按参数名自动注入
+```python
+def my_node(user_id, message, data):
+    """根据参数名从状态中自动获取值"""
+    print(f"用户ID: {user_id}")
+    print(f"消息: {message}")
+    print(f"数据: {data}")
+    return {"processed": True}
+
+# 调用时传入包含这些字段的状态
+flow.run({
+    "user_id": "123",
+    "message": "hello",
+    "data": {"key": "value"}
+})
+```
+
+#### 方式 3: 混合方式
+```python
+def my_node(user_id, state):
+    """混合方式：部分参数 + 整个状态"""
+    print(f"用户ID: {user_id}")
+    print(f"完整状态: {state}")
+    return {"user_processed": True}
+```
+
+### 5.2 函数返回值方式
+
+节点函数支持多种返回值格式：
+
+#### 方式 1: 只返回新状态
+```python
+def my_node(state):
+    """只更新状态，使用默认action"""
+    return {"new_data": "value", "timestamp": time.time()}
+```
+
+#### 方式 2: 返回action和新状态
+```python
+def my_node(state):
+    """返回action和更新后的状态"""
+    if state.get("condition"):
+        return "success", {"result": "success"}
+    else:
+        return "error", {"result": "error"}
+```
+
+#### 方式 3: 只返回action
+```python
+def my_node(state):
+    """只返回action，不更新状态"""
+    if state.get("condition"):
+        return "success"
+    else:
+        return "error"
+```
+
+#### 方式 4: 返回None（结束工作流）
+```python
+def my_node(state):
+    """返回None结束工作流"""
+    if state.get("should_stop"):
+        return None
+    return "continue", {"step": "completed"}
+```
+
+### 5.3 异步节点函数
+
+异步节点函数使用 `aexec` 参数，支持所有同步函数的特性：
+
+```python
+import asyncio
+
+async def async_node(state):
+    """异步节点函数"""
+    await asyncio.sleep(0.1)  # 模拟异步操作
+    return {"async_result": "done"}
+
+async def async_node_with_action(user_id, state):
+    """异步节点函数 - 混合参数 + action"""
+    await asyncio.sleep(0.1)
+    return "next", {"user_id": user_id, "processed": True}
+
+# 创建异步节点
+n1 = Node("async_node", aexec=async_node)
+n2 = Node("async_node_with_action", aexec=async_node_with_action)
+
+# 异步执行
+asyncio.run(flow.arun({"user_id": "123"}))
+```
+
+### 5.4 节点类继承方式
+
+除了函数方式，还可以通过继承 `Node` 类来创建节点：
+
+```python
+class MyNode(Node):
+    def exec(self, state):
+        """同步执行方法"""
+        print(f"执行节点: {self.name}")
+        return {"class_result": "success"}
+    
+    async def aexec(self, state):
+        """异步执行方法"""
+        print(f"异步执行节点: {self.name}")
+        return {"async_class_result": "success"}
+
+# 使用类节点
+n1 = MyNode("my_class_node")
+```
+
+### 5.5 错误处理和重试
+
+节点支持错误处理和重试机制：
+
+```python
+def risky_node(state):
+    """可能出错的节点"""
+    if random.random() < 0.5:
+        raise Exception("随机错误")
+    return {"success": True}
+
+# 创建支持重试的节点
+n1 = Node("risky_node", exec=risky_node, max_retries=3, wait=1)
+
+# 自定义错误处理
+class SafeNode(Node):
+    def exec_fallback(self, state, exc):
+        """自定义错误处理"""
+        return "error", {"error": str(exc), "recovered": True}
+    
+    async def aexec_fallback(self, state, exc):
+        """自定义异步错误处理"""
+        return "error", {"error": str(exc), "recovered": True}
+```
+
+### 5.6 完整示例
+
+```python
+from agnflow import Node, Flow
+import time
+
+# 定义不同类型的节点函数
+def start_node(user_id, message):
+    """接收特定参数"""
+    return "process", {"user_id": user_id, "message": message}
+
+def process_node(state):
+    """接收整个状态"""
+    processed = f"处理: {state['message']}"
+    return "complete", {"processed": processed, "timestamp": time.time()}
+
+def complete_node(result, state):
+    """混合参数"""
+    print(f"结果: {result}")
+    print(f"状态: {state}")
+    return {"final_result": "success"}
+
+# 创建节点
+n1 = Node("start", exec=start_node)
+n2 = Node("process", exec=process_node)
+n3 = Node("complete", exec=complete_node)
+
+# 连接节点
+n1 >> {"process": n2} >> {"complete": n3}
+
+# 创建工作流
+flow = Flow(n1, name="example_flow")
+
+# 运行工作流
+result = flow.run({
+    "user_id": "123",
+    "message": "Hello agnflow!"
+})
+
+print(f"工作流结果: {result}")
+```
+
+## 6. 节点连接语法
 
 agnflow 提供了多种灵活的节点连接方式：
 
-### 5.1 线性连接
+### 6.1 线性连接
 ```python
 # 方法1：正向连接
 a >> b >> c
@@ -188,25 +394,25 @@ a >> b >> c
 c << b << a
 ```
 
-### 5.2 分支连接
+### 6.2 分支连接
 ```python
 # 根据节点返回值进行分支
 a >> {"b": b, "c": c}
 ```
 
-### 5.3 复杂分支和循环
+### 6.3 复杂分支和循环
 ```python
 # 支持嵌套分支和循环
 a >> {"b": b >> {"b2": flow3}, "c": c >> {"a": a}}
 ```
 
-### 5.4 子流程连接
+### 6.4 子流程连接
 ```python
 # 连接子流程
 d1 >> flow >> d2
 ```
 
-## 6. 复杂工作流示例
+## 7. 复杂工作流示例
 
 运行示例代码`src/agnflow/example.py`后，会生成以下流程图：
 
@@ -216,16 +422,44 @@ a >> {"b": b >> {"b2": flow3}, "c": c >> {"a": a}}
 d1 >> flow >> d2
 ```
 
-### 6.1 Dot 格式流程图
+### 7.1 Dot 格式流程图
 ![Dot Flow](assets/flow_dot.png)
 
-### 6.2 Mermaid 格式流程图  
+### 7.2 Mermaid 格式流程图  
 ![Mermaid Flow](assets/flow_mermaid.png)
 
+这些流程图展示了：
+- 节点之间的连接关系
+- 分支和循环结构
+- 子流程的嵌套关系
+- 工作流的整体执行路径
 
-## 7. 参考框架
+## 8. 参考框架
 
 agnflow 参考和对标了以下主流智能体/工作流框架：
 
-![LangGraph](https://img.shields.io/badge/LangGraph-green.svg) ![LlamaIndex](https://img.shields.io/badge/LlamaIndex-green.svg) ![PocketFlow](https://img.shields.io/badge/PocketFlow-green.svg) ![AutoGen](https://img.shields.io/badge/AutoGen-green.svg) ![Haystack](https://img.shields.io/badge/Haystack-green.svg) ![CrewAI](https://img.shields.io/badge/CrewAI-green.svg) ![FastGPT](https://img.shields.io/badge/FastGPT-green.svg) 
+![LangGraph](https://img.shields.io/badge/LangGraph-green.svg) ![LlamaIndex](https://img.shields.io/badge/LlamaIndex-green.svg) ![AutoGen](https://img.shields.io/badge/AutoGen-green.svg) ![Haystack](https://img.shields.io/badge/Haystack-green.svg) ![CrewAI](https://img.shields.io/badge/CrewAI-green.svg) ![FastGPT](https://img.shields.io/badge/FastGPT-green.svg) ![PocketFlow](https://img.shields.io/badge/PocketFlow-green.svg)
+
+## 9. 项目状态
+
+### 📦 发布状态
+- **PyPI**: ✅ [v0.1.0](https://pypi.org/project/agnflow/0.1.0/) 已发布
+- **GitHub**: ✅ [开源仓库](https://github.com/jianduo1/agnflow)
+- **文档**: ✅ [API 文档](docs/API.md) 完整
+- **测试**: ✅ 功能测试通过
+
+### 🔄 版本信息
+- **当前版本**: 0.1.0
+- **Python 支持**: 3.8+
+- **许可证**: MIT
+- **状态**: Beta
+
+## 10. 参考框架
+
+agnflow 参考和对标了以下主流智能体/工作流框架：
+
+![LangGraph](https://img.shields.io/badge/LangGraph-green.svg) ![LlamaIndex](https://img.shields.io/badge/LlamaIndex-green.svg) ![AutoGen](https://img.shields.io/badge/AutoGen-green.svg) ![Haystack](https://img.shields.io/badge/Haystack-green.svg) ![CrewAI](https://img.shields.io/badge/CrewAI-green.svg) ![FastGPT](https://img.shields.io/badge/FastGPT-green.svg) ![PocketFlow](https://img.shields.io/badge/PocketFlow-green.svg)
+
+## 11. 许可证
+MIT
 

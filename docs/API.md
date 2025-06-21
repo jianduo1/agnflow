@@ -1,221 +1,103 @@
-# agnflow API 文档
+# API 参考
 
-## 核心类
+本页提供 `agnflow` 主要类的 API 参考。
 
-### Node
+## `Flow` 类
 
-工作流中的基本执行单元。
+`Flow` 类用于构建和执行工作流。
 
-#### 构造函数
+### `__init__(self, start_node: Node, name: str = "flow")`
+
+初始化一个工作流。
+
+- **`start_node`**: 工作流的起始节点。
+- **`name`**: (可选) 工作流的名称。
+
+### `run(self, initial_state: dict = None) -> dict`
+
+同步执行工作流。
+
+- **`initial_state`**: (可选) 工作流的初始状态字典。
+- **返回**: 工作流执行完毕后的最终状态。
+
+### `arun(self, initial_state: dict = None) -> dict`
+
+异步执行工作流。
+
+- **`initial_state`**: (可选) 工作流的初始状态字典。
+- **返回**: 工作流执行完毕后的最终状态。
+
+### `render_dot(self, saved_file: str = None) -> str`
+
+将工作流渲染为 `dot` 格式。
+
+- **`saved_file`**: (可选) 图片保存路径。如果提供，将生成图片文件。
+- **返回**: `dot` 语言描述的字符串。
+
+### `render_mermaid(self, saved_file: str = None) -> str`
+
+将工作流渲染为 `mermaid` 格式。
+
+- **`saved_file`**: (可选) 图片保存路径。如果提供，将生成图片文件。
+- **返回**: `mermaid` 语言描述的字符串。
+
+---
+
+## `Node` 类
+
+`Node` 类是工作流中的基本执行单元。
+
+### `__init__(self, name: str, exec: callable = None, aexec: callable = None, max_retries: int = 0, wait: int = 0)`
+
+初始化一个节点。
+
+- **`name`**: 节点的唯一名称。
+- **`exec`**: (可选) 节点的同步执行函数。
+- **`aexec`**: (可选) 节点的异步执行函数。
+- **`max_retries`**: (可选) 失败后的最大重试次数。
+- **`wait`**: (可选) 每次重试之间的等待秒数。
+
+### `__rshift__(self, other)`
+
+定义节点连接，例如 `n1 >> n2`。
+
+### 节点执行函数
+
+#### 输入参数
+
+`agnflow` 会根据函数签名自动从状态字典中注入参数。
 
 ```python
-Node(name: str = None, exec: Callable = None, aexec: Callable = None, max_retries=1, wait=0)
+# 接收整个状态
+def my_node(state: dict):
+    ...
+
+# 按名称接收特定参数
+def my_node(user_id, message):
+    ...
 ```
 
-**参数：**
-- `name`: 节点名称，如果不提供则自动生成
-- `exec`: 同步执行函数
-- `aexec`: 异步执行函数
-- `max_retries`: 最大重试次数，默认1
-- `wait`: 重试间隔时间（秒），默认0
+#### 返回值
 
-#### 执行函数签名
+函数的返回值会更新状态，并决定下一个执行的节点。
 
 ```python
-def exec(state) -> str | dict | tuple[str, dict]:
-    """
-    同步执行函数
-    
-    Args:
-        state: 当前状态字典
-        
-    Returns:
-        str: 下一个节点的action
-        dict: 更新后的状态
-        tuple[str, dict]: (action, state) 元组
-    """
-    pass
-
-async def aexec(state) -> str | dict | tuple[str, dict]:
-    """
-    异步执行函数
-    
-    Args:
-        state: 当前状态字典
-        
-    Returns:
-        str: 下一个节点的action
-        dict: 更新后的状态
-        tuple[str, dict]: (action, state) 元组
-    """
-    pass
-```
-
-### Flow
-
-工作流容器，管理节点的执行顺序。
-
-#### 构造函数
-
-```python
-Flow(start: Conn | None = None, name: str = None)
-```
-
-**参数：**
-- `start`: 起始节点
-- `name`: 工作流名称
-
-#### 主要方法
-
-```python
-def run(self, state: dict) -> dict:
-    """同步执行工作流"""
-    pass
-
-async def arun(self, state: dict) -> dict:
-    """异步执行工作流"""
-    pass
-
-def render_dot(self, saved_file: str = None) -> str:
-    """生成dot格式流程图"""
-    pass
-
-def render_mermaid(self, saved_file: str = None) -> str:
-    """生成mermaid格式流程图"""
-    pass
-```
-
-## 节点连接语法
-
-### 线性连接
-
-```python
-# 正向连接
-node1 >> node2 >> node3
-
-# 反向连接
-node3 << node2 << node1
-```
-
-### 分支连接
-
-```python
-# 根据返回值分支
-node1 >> {"action1": node2, "action2": node3}
-
-# 条件分支
-node1 >> {"success": success_node, "error": error_node}
-```
-
-### 循环连接
-
-```python
-# 循环到自身
-node1 >> {"continue": node1, "end": end_node}
-
-# 循环到其他节点
-node1 >> {"retry": node1, "next": node2}
-```
-
-### 子流程连接
-
-```python
-# 连接子流程
-start_node >> sub_flow >> end_node
-```
-
-## 状态管理
-
-### 状态注入
-
-节点函数可以通过参数名自动从状态中获取值：
-
-```python
-def my_node(user_id, message, state):
-    # user_id 和 message 会从 state 中自动获取
-    # state 参数会接收整个状态字典
-    pass
-```
-
-### 状态更新
-
-节点函数可以通过返回值更新状态：
-
-```python
+# 方式1: 只返回新状态 (字典)
 def my_node(state):
-    # 返回新状态
-    return {"result": "processed", "timestamp": time.time()}
-    
-    # 返回action和新状态
-    return "next_action", {"result": "processed"}
-```
+    return {"new_data": "value"}
 
-## 错误处理
+# 方式2: 返回 action 和新状态 (元组)
+def my_node(state):
+    if state.get("condition"):
+        return "success", {"result": "ok"}
+    return "error", {"result": "fail"}
 
-### 重试机制
+# 方式3: 只返回 action (字符串)
+def my_node(state):
+    return "next_step"
 
-```python
-# 设置重试次数和间隔
-node = Node("retry_node", exec=my_func, max_retries=3, wait=1)
-```
-
-### 自定义错误处理
-
-```python
-class MyNode(Node):
-    def exec_fallback(self, state, exc):
-        # 自定义错误处理逻辑
-        return "error_action", {"error": str(exc)}
-    
-    async def aexec_fallback(self, state, exc):
-        # 自定义异步错误处理逻辑
-        return "error_action", {"error": str(exc)}
-```
-
-## 流程图渲染
-
-### Dot格式
-
-```python
-# 输出dot格式文本
-dot_text = flow.render_dot()
-
-# 保存为图片
-flow.render_dot(saved_file="./flow.png")
-```
-
-### Mermaid格式
-
-```python
-# 输出mermaid格式文本
-mermaid_text = flow.render_mermaid()
-
-# 保存为图片
-flow.render_mermaid(saved_file="./flow.png")
-```
-
-## 最佳实践
-
-### 1. 节点设计
-
-- 保持节点功能单一
-- 使用有意义的节点名称
-- 合理处理异常情况
-
-### 2. 状态管理
-
-- 避免在状态中存储过大的数据
-- 使用类型提示提高代码可读性
-- 保持状态结构的一致性
-
-### 3. 错误处理
-
-- 为关键节点设置重试机制
-- 实现自定义错误处理逻辑
-- 记录详细的错误信息
-
-### 4. 性能优化
-
-- 合理使用异步节点
-- 避免在节点中执行耗时操作
-- 考虑使用缓存机制 
+# 方式4: 返回 None
+# 将结束整个工作流
+def my_node(state):
+    return None
+``` 
