@@ -1,0 +1,99 @@
+# agnflow 项目编码规范
+
+## 项目概述
+agnflow 是一个简洁的 Python 工作流引擎，支持同步与异步节点、分支、循环、流程图渲染。
+
+## 代码风格
+- 使用 Python 3.8+ 语法
+- 遵循 PEP 8 编码规范
+- 使用类型提示 (Type Hints)
+- 函数和类名使用 snake_case
+- 类名使用 PascalCase
+- 常量使用 UPPER_CASE
+
+## 文件组织
+- 源代码位于 `src/agnflow/` 目录
+- 文档位于 `docs/` 目录
+- 示例代码位于 `src/agnflow/example.py`
+- 测试文件位于 `tests/` 目录（如果存在）
+
+## 核心组件
+- `Node`: 工作流节点，支持同步和异步执行
+- `Flow`: 工作流容器，管理节点执行顺序
+- `Conn`: 节点连接基类
+
+## 导入规范
+```python
+# 标准库导入
+import asyncio
+import tempfile
+import subprocess
+import warnings
+import copy
+import time
+
+# 第三方库导入
+from typing import Callable, TypedDict
+
+# 本地导入
+from .core import Node, Flow, Conn
+```
+
+## 函数签名规范
+```python
+def exec(self, state: dict) -> str | dict | tuple[str, dict]:
+    """
+    同步执行函数
+    
+    Args:
+        state: 当前状态字典
+        
+    Returns:
+        str: 下一个节点的action
+        dict: 更新后的状态
+        tuple[str, dict]: (action, state) 元组
+    """
+    pass
+
+async def aexec(self, state: dict) -> str | dict | tuple[str, dict]:
+    """
+    异步执行函数
+    
+    Args:
+        state: 当前状态字典
+        
+    Returns:
+        str: 下一个节点的action
+        dict: 更新后的状态
+        tuple[str, dict]: (action, state) 元组
+    """
+    pass
+```
+
+## 错误处理
+- 使用 try-except 进行异常处理
+- 实现自定义的 fallback 方法
+- 记录详细的错误信息
+- 支持重试机制
+
+## 文档规范
+- 所有公共 API 必须有文档字符串
+- 使用 Google 风格的文档字符串
+- 包含参数说明、返回值说明和示例
+
+## 扩展性设计
+- 保持节点功能单一
+- 使用插件化架构
+- 支持自定义节点类型
+- 提供丰富的配置选项
+
+## 国际化
+- 支持中英文文档
+- 错误信息支持多语言
+- 配置支持本地化
+
+## 依赖管理
+- 使用 rye 进行依赖管理
+- 明确指定版本范围
+- 定期更新依赖
+- 避免使用过时的库
