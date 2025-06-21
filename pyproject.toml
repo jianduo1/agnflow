@@ -3,7 +3,7 @@ name = "agnflow"
 version = "0.1.0"
 description = "一个简洁的 Python 工作流引擎，支持同步与异步节点、分支、循环、流程图渲染。"
 authors = [
-    { name = "Your Name", email = "your@email.com" }
+    { name = "jianduo1", email = "jianduo1@gmail.com" }
 ]
 dependencies = [
     "openai>=1.0.0",
@@ -33,7 +33,7 @@ dev-dependencies = [
 [tool.rye.scripts]
 
 [project.urls]
-Homepage = "https://github.com/yourname/agnflow"
+Homepage = "https://github.com/jianduo1/agnflow"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
