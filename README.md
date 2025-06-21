@@ -31,13 +31,36 @@
 
 ## 3. 安装
 
+### 3.1 从 PyPI 安装（推荐）
+
+```bash
+# 使用 pip 安装
+pip install agnflow
+
+# 使用 rye 安装
+rye add agnflow
+
+# 使用 poetry 安装
+poetry add agnflow
+```
+
+### 3.2 从源码安装
+
 推荐使用 [rye](https://rye-up.com/) 进行依赖和虚拟环境管理：
 
 ```bash
+# 克隆仓库
+git clone https://github.com/jianduo1/agnflow.git
+cd agnflow
+
+# 安装依赖
 rye sync
+
+# 开发模式安装
+rye sync --dev
 ```
 
-### 3.1 流程图渲染工具（可选）
+### 3.3 流程图渲染工具（可选）
 
 **注意：生成图片需要安装额外的工具**
 
@@ -64,6 +87,48 @@ npm install -g @mermaid-js/mermaid-cli
 # 安装 puppeteer 浏览器（用于渲染）
 npx puppeteer browsers install chrome-headless-shell
 ```
+
+### 3.4 开发环境
+
+使用 rye 管理开发环境：
+
+```bash
+# 安装依赖
+rye sync
+
+# 运行测试
+rye run test
+
+# 代码格式化
+rye run format
+
+# 代码检查
+rye run lint
+
+# 运行示例
+rye run example
+```
+
+### 3.5 发布到 PyPI
+
+```bash
+# 清理之前的构建
+rye run clean
+
+# 构建包
+rye run build
+
+# 上传到测试 PyPI（推荐先测试）
+rye run upload-test
+
+# 上传到正式 PyPI
+rye run upload
+```
+
+**注意：** 首次上传到 PyPI 需要：
+1. 在 [PyPI](https://pypi.org) 注册账号
+2. 在 [TestPyPI](https://test.pypi.org) 注册账号
+3. 配置 `~/.pypirc` 文件或使用环境变量
 
 ## 4. 快速开始
 

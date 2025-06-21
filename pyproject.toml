@@ -15,6 +15,21 @@ dependencies = [
 ]
 readme = "README.md"
 requires-python = ">=3.8"
+keywords = ["workflow", "agent", "llm", "async", "python", "automation"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Distributed Computing",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -27,13 +42,41 @@ dev-dependencies = [
     "pytest-asyncio>=0.21.0",
     "black>=23.0.0",
     "isort>=5.12.0",
-    "flake8>=6.0.0"
+    "flake8>=6.0.0",
+    "build>=1.2.2.post1",
+    "twine>=6.1.0",
 ]
 
 [tool.rye.scripts]
+# 开发工具
+test = "pytest"
+format = "black ."
+format-check = "black --check ."
+lint = "flake8 ."
+sort = "isort ."
+
+# 构建和发布
+build = "python -m build"
+clean = "rm -rf dist/ build/ *.egg-info/"
+
+# PyPI 发布
+# upload-test: 上传到 TestPyPI (测试环境，可重复上传)
+# 安装测试: pip install -i https://test.pypi.org/simple/ agnflow
+upload-test = "twine upload --repository testpypi dist/*"
+
+# upload: 上传到正式 PyPI (生产环境，不可重复上传)
+# 安装: pip install agnflow
+upload = "twine upload dist/*"
+
+# 运行示例
+example = "python src/agnflow/example.py"
 
 [project.urls]
 Homepage = "https://github.com/jianduo1/agnflow"
+Documentation = "https://github.com/jianduo1/agnflow/tree/main/docs"
+Repository = "https://github.com/jianduo1/agnflow.git"
+Issues = "https://github.com/jianduo1/agnflow/issues"
+Changelog = "https://github.com/jianduo1/agnflow/releases"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

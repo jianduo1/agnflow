@@ -4,7 +4,7 @@ agnflow 用法示例
 
 from typing import TypedDict
 import asyncio
-from . import Node, Flow
+from agnflow import Node, Flow
 
 
 # ✨一、状态定义（使用TypedDict）
