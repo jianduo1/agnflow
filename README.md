@@ -5,7 +5,7 @@
   <h3>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
     <a href="https://jianduo1.github.io/agnflow/"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Docs"></a>
-    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/pypi/v/agnflow.svg" alt="PyPI"></a>
+    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/badge/pypi-v0.1.0-blue.svg" alt="PyPI"></a>
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
   </h3>
 </div>
@@ -13,6 +13,13 @@
 中文 | [English](README_en.md)
 
 **agnflow** 追求极简、易用、可扩展，适合快速原型、定制化 LLM 工作流、Agent 任务流等场景。
+
+## 🎯 核心功能展示
+
+| 基础蜂群连接 | 节点与蜂群连接 | 多个蜂群连接 |
+|:------------:|:--------------:|:------------:|
+| ![](assets/swarm_mermaid1.png) | ![](assets/swarm_mermaid2.png) | ![](assets/swarm_mermaid3.png) |
+| 蜂群智能体之间的连接与协作 | 节点与蜂群的灵活连接 | 多个蜂群之间的组合与扩展 |
 
 ## 1. TODO（未来扩展方向）
 
@@ -499,3 +506,4 @@ digraph {
     E -> F;
 }
 ```
+

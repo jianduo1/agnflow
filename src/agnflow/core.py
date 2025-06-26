@@ -20,6 +20,31 @@ import inspect
 import re
 
 
+def get_code_line() -> list[str]:
+    """基于调用栈获取代码行
+
+    ```python
+    1 + 1; l = get_code_line()
+    print(l)
+    out:
+    ['1 + 1']
+    ```
+    """
+    stack = inspect.stack()[1:]
+    try:
+
+        def handle(line):
+            if ";" in line and "get_code_line" in line:
+                for i in line.split(";"):
+                    if "get_code_line" not in i:
+                        return i.strip()
+            return line
+
+        return [handle(frame.code_context[0].strip()) for frame in stack if frame.code_context]
+    finally:
+        del stack
+
+
 class Connection:
     """连接关系（节点与容器）
 
@@ -27,7 +52,7 @@ class Connection:
     - name 通过查询调用堆栈的技术，动态获取当前实例的变量名，作为name属性
     - chains 链式调用数组 c1 >> c2 >> c3 ==> [c1, c2, c3]
     - conntainer 工作流容器，支持容器嵌套容器，如 flow[a,b] 相当于 {flow:[a,b]}
-    - connections 显式连接，如 
+    - connections 显式连接，如
         a >> flow[x,y] >> b 相当于 a-flow-b 相当于 {a:{"flow":flow}, flow:{"b":b}}
     - hidden_connections 隐式连接，绘制mermaid流程图时会隐式，如
         a >> flow[x,y] >> b 相当于 a-x a-y x-b y-b 相当于 {a:{"x":x,"y":y}, x:{"b}:b, y:{"b}:b}
@@ -67,26 +92,28 @@ class Connection:
 
     def _get_instance_name(self) -> str:
         """设置实例名称"""
-        stack = inspect.stack()
+        # stack = inspect.stack()
         try:
             # stack[0]: _collect_names
             # stack[1]: Connections.__init__
             # stack[2]: Node.__init__ or Flow.__init__
             # stack[3]: 用户代码中调用构造函数的帧。
-            if len(stack) > 1:
-                for frame in stack:
-                    if frame.code_context:
-                        line = frame.code_context[0].strip()
-                        match = re.match(r"^\s*(\w+)\s*=\s*" + self.__class__.__name__ + r"\(", line)
-                        if match:
-                            return str(match.group(1))
+            for line in get_code_line():
+                match = re.match(r"^\s*(\w+)\s*=\s*" + self.__class__.__name__ + r"\(", line)
+                if match:
+                    return str(match.group(1))
+            # if len(stack) > 1:
+            #     for frame in stack:
+            #         if frame.code_context:
+            #             line = frame.code_context[0].strip()
+            #             match = re.match(r"^\s*(\w+)\s*=\s*" + self.__class__.__name__ + r"\(", line)
+            #             if match:
+            #                 return str(match.group(1))
             return self.__class__.__name__
         except Exception:
             return self.__class__.__name__
-        finally:
-            # 避免引用循环
-            # https://docs.python.org/3/library/inspect.html#the-interpreter-stack
-            del stack
+        # finally:
+        #     del stack
 
     def __repr__(self) -> str:
         return f"{self.name}"
@@ -362,12 +389,12 @@ class Connection:
         lines.append("}")
         viz_str = "\n".join(lines)
         if saved_file:
-            if not (Path(saved_file).parent.exists() and Path(saved_file).is_file()):
-                saved_file = Path(__file__).parent.parent.parent / "assets/flow_dot.png"
+            saved_filepath = Path.cwd() / saved_file
+            saved_filepath.parent.mkdir(parents=True, exist_ok=True)
             with tempfile.NamedTemporaryFile("w+", suffix=".dot") as tmp_dot:
                 tmp_dot.write(viz_str)
                 tmp_dot.flush()
-                s, o = subprocess.getstatusoutput(f"dot -Tpng {tmp_dot.name} -o {saved_file}")
+                s, o = subprocess.getstatusoutput(f"dot -Tpng {tmp_dot.name} -o {saved_filepath}")
                 if s != 0:
                     warnings.warn(f"dot 生成图片失败，检查 dot 是否安装（brew install graphviz）: {o}")
                 else:
@@ -393,41 +420,56 @@ class Connection:
                     used_nodes.update(nested_nodes)
         return lines, used_nodes
 
-    def render_mermaid(self, saved_file: str = None):
+    def render_mermaid(self, saved_file: str = None, title: str = ""):
         import tempfile, subprocess, warnings
         from pathlib import Path
 
+        config_block = f"""---\ntitle: {title}\nconfig:\n  look: handDrawn\n---\n"""
+
         lines = ["graph TB"]
-        # 找到所有 cluster 节点（conntainer 的 key）
         clusters = list(self.conntainer.keys()) if hasattr(self, "conntainer") and self.conntainer else [self]
-        # 1. 输出每个 cluster 的 subgraph
         declared_nodes = set()
         declared_clusters = set()
         cluster_internal_edges = []
         external_edges = []
-        # 收集 cluster 内部边和外部边
         cluster_name_map = {}
         for cluster in clusters:
             members = self.conntainer.get(cluster, []) if hasattr(self, "conntainer") else []
             member_names = set(n.name for n in members)
             for node in members:
                 cluster_name_map[node.name] = cluster.name
+        processed_pairs = set()
         for cluster in clusters:
             members = self.conntainer.get(cluster, []) if hasattr(self, "conntainer") else []
             member_names = set(n.name for n in members)
             for src, targets in cluster.connections.items():
                 for act, tgt in targets.items():
                     if src.name in member_names and tgt.name in member_names:
-                        label = f"{act}" if act and act != "default" else ""
-                        cluster_internal_edges.append((cluster.name, f"    {src.name} --{label}--> {tgt.name}"))
+                        pair = tuple(sorted([src.name, tgt.name]))
+                        if pair in processed_pairs:
+                            continue
+                        reverse_label = ""
+                        if tgt in cluster.connections and src.name in cluster.connections[tgt]:
+                            reverse_label = cluster.connections[tgt][src.name]
+                        label1 = f"{act}" if act and act != "default" else ""
+                        label2 = ""
+                        if reverse_label:
+                            label2 = f"{reverse_label}" if reverse_label and reverse_label != "default" else ""
+                        if label1 or label2:
+                            label = f"{label1} / {label2}".strip(" / ")
+                        else:
+                            label = ""
+                        edge_str = (
+                            f"    {src.name} <--> |{label}| {tgt.name}" if label else f"    {src.name} <--> {tgt.name}"
+                        )
+                        cluster_internal_edges.append((cluster.name, edge_str))
+                        processed_pairs.add(pair)
                     else:
-                        # 只收集 cluster 之间的边
                         src_cluster = cluster_name_map.get(src.name, src.name)
                         tgt_cluster = cluster_name_map.get(tgt.name, tgt.name)
                         if src_cluster != tgt_cluster:
                             label = f"{act}" if act and act != "default" else ""
                             external_edges.append((src_cluster, tgt_cluster, label))
-        # 输出 cluster subgraph
         for cluster in clusters:
             if cluster.name not in declared_clusters:
                 lines.append(f"subgraph {cluster.name}")
@@ -436,27 +478,25 @@ class Connection:
                     if node.name not in declared_nodes:
                         lines.append(f"    {node.name}")
                         declared_nodes.add(node.name)
-                # 输出内部边
                 for cname, edge in cluster_internal_edges:
                     if cname == cluster.name:
                         lines.append(edge)
                 lines.append("end")
                 declared_clusters.add(cluster.name)
-        # 输出外部边（去重）
         edge_set = set()
         for src, tgt, label in external_edges:
             edge_str = f"{src} --{label}--> {tgt}"
             if edge_str not in edge_set:
                 lines.append(edge_str)
                 edge_set.add(edge_str)
-        viz_str = "\n".join(lines)
+        viz_str = config_block + "\n".join(lines)
         if saved_file:
-            if not (Path(saved_file).parent.exists() and Path(saved_file).is_file()):
-                saved_file = Path(__file__).parent.parent.parent / "assets/mermaid_dot.png"
+            saved_filepath = Path.cwd() / saved_file
+            saved_filepath.parent.mkdir(parents=True, exist_ok=True)
             with tempfile.NamedTemporaryFile("w+", suffix=".mmd", delete=True) as tmp_mmd:
                 tmp_mmd.write(viz_str)
                 tmp_mmd.flush()
-                s, o = subprocess.getstatusoutput(f"mmdc -i {tmp_mmd.name} -o {saved_file}")
+                s, o = subprocess.getstatusoutput(f"mmdc -i {tmp_mmd.name} -o {saved_filepath}")
                 if s != 0:
                     warnings.warn(
                         f"mmdc 生成图片失败: {o}\n"
@@ -471,16 +511,17 @@ class Connection:
     # endregion
 
 
-c1 = Connection()
-c2 = Connection()
-c3 = Connection()
-c4 = Connection()
-c5 = Connection()
-flow = Connection()
-# print((c1 >> c2 >> c3).chains)
-# print((c1 << [c2, c3] << c4).connections)
-# print((c1 << flow[c2, c3 >> c5] << c4).connections)
-# print((c1 << flow[c2, c3 >> c5] << c4).hidden_connections)
+if __name__ == "__main__":
+    c1 = Connection()
+    c2 = Connection()
+    c3 = Connection()
+    c4 = Connection()
+    c5 = Connection()
+    flow = Connection()
+    # print((c1 >> c2 >> c3).chains)
+    # print((c1 << [c2, c3] << c4).connections)
+    # print((c1 << flow[c2, c3 >> c5] << c4).connections)
+    # print((c1 << flow[c2, c3 >> c5] << c4).hidden_connections)
 
 
 class Node(Connection):
@@ -594,12 +635,13 @@ class Node(Connection):
     # endregion
 
 
-n1 = Node()
-n2 = Node()
-n3 = Node()
-n4 = Node()
-# print((n1 >> [n2, n3] >> n4).connections)
-# print((n1 << n2 << n3).connections)
+if __name__ == "__main__":
+    n1 = Node()
+    n2 = Node()
+    n3 = Node()
+    n4 = Node()
+    # print((n1 >> [n2, n3] >> n4).connections)
+    # print((n1 << n2 << n3).connections)
 
 
 class Flow(Connection):
@@ -694,7 +736,6 @@ class Flow(Connection):
         3. 都没有就返回 None（对应 exit）
         """
         # 1. 优先使用 self.connections[self][entry_action]
-        print(f"self.conntainer: {self.conntainer} entry_action: {entry_action} self: {self}")
         if entry_action and self in self.conntainer and entry_action in [i.name for i in self.conntainer[self]]:
             start_node = next(i for i in self.conntainer[self] if i.name == entry_action)
             print(
@@ -733,91 +774,12 @@ class Flow(Connection):
 
     # endregion
 
-    # region 绘制流程图
-    render_dot = Connection.render_dot
 
-    def render_mermaid(self, saved_file: str = None):
-        import tempfile, subprocess, warnings
-        from pathlib import Path
-
-        lines = ["graph TB"]
-        # 找到所有 cluster 节点（conntainer 的 key）
-        clusters = list(self.conntainer.keys()) if hasattr(self, "conntainer") and self.conntainer else [self]
-        # 1. 输出每个 cluster 的 subgraph
-        declared_nodes = set()
-        declared_clusters = set()
-        cluster_internal_edges = []
-        external_edges = []
-        # 收集 cluster 内部边和外部边
-        cluster_name_map = {}
-        for cluster in clusters:
-            members = self.conntainer.get(cluster, []) if hasattr(self, "conntainer") else []
-            member_names = set(n.name for n in members)
-            for node in members:
-                cluster_name_map[node.name] = cluster.name
-        for cluster in clusters:
-            members = self.conntainer.get(cluster, []) if hasattr(self, "conntainer") else []
-            member_names = set(n.name for n in members)
-            for src, targets in cluster.connections.items():
-                for act, tgt in targets.items():
-                    if src.name in member_names and tgt.name in member_names:
-                        label = f"{act}" if act and act != "default" else ""
-                        cluster_internal_edges.append((cluster.name, f"    {src.name} --{label}--> {tgt.name}"))
-                    else:
-                        # 只收集 cluster 之间的边
-                        src_cluster = cluster_name_map.get(src.name, src.name)
-                        tgt_cluster = cluster_name_map.get(tgt.name, tgt.name)
-                        if src_cluster != tgt_cluster:
-                            label = f"{act}" if act and act != "default" else ""
-                            external_edges.append((src_cluster, tgt_cluster, label))
-        # 输出 cluster subgraph
-        for cluster in clusters:
-            if cluster.name not in declared_clusters:
-                lines.append(f"subgraph {cluster.name}")
-                members = self.conntainer.get(cluster, []) if hasattr(self, "conntainer") else []
-                for node in members:
-                    if node.name not in declared_nodes:
-                        lines.append(f"    {node.name}")
-                        declared_nodes.add(node.name)
-                # 输出内部边
-                for cname, edge in cluster_internal_edges:
-                    if cname == cluster.name:
-                        lines.append(edge)
-                lines.append("end")
-                declared_clusters.add(cluster.name)
-        # 输出外部边（去重）
-        edge_set = set()
-        for src, tgt, label in external_edges:
-            edge_str = f"{src} --{label}--> {tgt}"
-            if edge_str not in edge_set:
-                lines.append(edge_str)
-                edge_set.add(edge_str)
-        viz_str = "\n".join(lines)
-        if saved_file:
-            if not (Path(saved_file).parent.exists() and Path(saved_file).is_file()):
-                saved_file = Path(__file__).parent.parent.parent / "assets/mermaid_dot.png"
-            with tempfile.NamedTemporaryFile("w+", suffix=".mmd", delete=True) as tmp_mmd:
-                tmp_mmd.write(viz_str)
-                tmp_mmd.flush()
-                s, o = subprocess.getstatusoutput(f"mmdc -i {tmp_mmd.name} -o {saved_file}")
-                if s != 0:
-                    warnings.warn(
-                        f"mmdc 生成图片失败: {o}\n"
-                        "检查 mmdc 是否安装:\n"
-                        "- npm install -g @mermaid-js/mermaid-cli\n"
-                        "- npx puppeteer browsers install chrome-headless-shell"
-                    )
-                else:
-                    print(f"图片已保存为: {saved_file}")
-        return viz_str
-
-    # endregion
-
-
-f1 = Flow()
-# print(f1[n1:n4:n2])
-# print(f1[n1 : [n3, n4 ]].connections)
-# print(f1[n1 : [n3, n4 >> n2 >> n3]].all_connections)
+if __name__ == "__main__":
+    f1 = Flow()
+    # print(f1[n1:n4:n2])
+    # print(f1[n1 : [n3, n4 ]].connections)
+    # print(f1[n1 : [n3, n4 >> n2 >> n3]].all_connections)
 
 
 class Supervisor(Flow):
@@ -849,8 +811,9 @@ class Supervisor(Flow):
         return self
 
 
-s = Supervisor()
-# print(s[n1, n2, n3].connections)
+if __name__ == "__main__":
+    s = Supervisor()
+    # print(s[n1, n2, n3].connections)
 
 
 class Swarm(Flow):
@@ -880,32 +843,35 @@ class Swarm(Flow):
         return self
 
 
-from pprint import pprint
+if __name__ == "__main__":
+    from pprint import pprint
 
-n1 = Node(exec=lambda state: "n2")
-n2 = Node(exec=lambda state: "n3")
-n3 = Node(exec=lambda state: "n4")
-n4 = Node(exec=lambda state: "exit")
-s1 = Swarm()
-s2 = Swarm()
+    n1 = Node(exec=lambda state: "n2")
+    n2 = Node(exec=lambda state: "n3")
+    n3 = Node(exec=lambda state: "n4")
+    n4 = Node(exec=lambda state: "exit")
+    s1 = Swarm()
+    s2 = Swarm()
+    s3 = Swarm()
 
-# s1[n1, n2, n3,n4]
-# n1 >> s1[n2, n3] >> n4
-s1[n1, n2] >> s2[n3, n4]
+    # s1[n1, n2, n3,n4];title=get_code_line()
+    # n1 >> s1[n2, n3] >> n4;title=get_code_line()
+    s1[n1, n2] >> s2[n3, n4]
+    title = get_code_line()
 
-print("\n一、蜂群智能体连接关系")
-print("🔍 蜂群容器")
-pprint(s1.conntainer, indent=2, width=30)
-print("🔍 蜂群隐式连接")
-pprint(s1.hidden_connections, indent=2, width=30)
-print("🔍 蜂群显式连接")
-pprint(s1.connections, indent=2, width=30)
-print("🔍 蜂群所有连接")
-pprint(s1.all_connections, indent=2, width=30)
+    # 绘制流程图
+    # print(s1.render_dot(saved_file="assets/swarm_dot.png"))
+    print(s1.render_mermaid(saved_file="assets/swarm_mermaid3.png", title=title))
 
-print("\n二、蜂群智能体执行")
-s1.run({}, max_steps=10, entry_action="n2")
+    # 连接关系
+    # # 蜂群容器
+    # pprint(s1.conntainer, indent=2, width=30)
+    # # 蜂群隐式连接
+    # pprint(s1.hidden_connections, indent=2, width=30)
+    # # 蜂群显式连接
+    # pprint(s1.connections, indent=2, width=30)
+    # # 蜂群所有连接
+    # pprint(s1.all_connections, indent=2, width=30)
 
-print("\n三、蜂群智能体绘制流程图")
-print(s1.render_dot(saved_file="assets/swarm_dot.png"))
-print(s1.render_mermaid(saved_file="assets/swarm_mermaid.png"))
+    # 执行流程
+    # s1.run({}, max_steps=10, entry_action="n2")
