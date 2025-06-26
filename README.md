@@ -16,10 +16,12 @@
 
 ## 🎯 核心功能展示
 
-| 基础蜂群连接 | 节点与蜂群连接 | 多个蜂群连接 |
-|:------------:|:--------------:|:------------:|
-| ![](assets/swarm_mermaid1.png) | ![](assets/swarm_mermaid2.png) | ![](assets/swarm_mermaid3.png) |
-| 蜂群智能体之间的连接与协作 | 节点与蜂群的灵活连接 | 多个蜂群之间的组合与扩展 |
+| 智能体类型 | 代码示例 | 流程图 |
+|:----------:|:--------|:------:|
+| **监督者智能体** | `s1[n1, n2, n3] >> n4` | <img src="assets/supervisor_mermaid.png" height="150" alt="监督者智能体流程图"> |
+| **基础蜂群连接** | `s1[n1, n2, n3]` | <img src="assets/swarm_mermaid1.png" height="150" alt="基础蜂群连接流程图"> |
+| **节点与蜂群连接** | `n1 >> s1[n2, n3] >> n4` | <img src="assets/swarm_mermaid2.png" height="150" alt="节点与蜂群连接流程图"> |
+| **多个蜂群连接** | `s1[n1, n2] >> s2[n3, n4]` | <img src="assets/swarm_mermaid3.png" height="150" alt="多个蜂群连接流程图"> |
 
 ## 1. TODO（未来扩展方向）
 

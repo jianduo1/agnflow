@@ -35,9 +35,7 @@ def get_code_line() -> list[str]:
 
         def handle(line):
             if ";" in line and "get_code_line" in line:
-                for i in line.split(";"):
-                    if "get_code_line" not in i:
-                        return i.strip()
+                line = ";".join([i for i in line.split(";") if "get_code_line" not in i])
             return line
 
         return [handle(frame.code_context[0].strip()) for frame in stack if frame.code_context]
@@ -421,10 +419,12 @@ class Connection:
         return lines, used_nodes
 
     def render_mermaid(self, saved_file: str = None, title: str = ""):
-        import tempfile, subprocess, warnings
-        from pathlib import Path
 
-        config_block = f"""---\ntitle: {title}\nconfig:\n  look: handDrawn\n---\n"""
+        # 对 title 进行 YAML 安全处理，移除所有特殊字符
+        safe_title = str(title).replace('"', '').replace("'", "").replace("[", "").replace("]", "").replace("\n", " ").strip()
+        if not safe_title:
+            safe_title = ""
+        config_block = f"""---\ntitle: "{title}"\nconfig:\n  look: handDrawn\n---\n"""
 
         lines = ["graph TB"]
         clusters = list(self.conntainer.keys()) if hasattr(self, "conntainer") and self.conntainer else [self]
@@ -812,8 +812,16 @@ class Supervisor(Flow):
 
 
 if __name__ == "__main__":
-    s = Supervisor()
-    # print(s[n1, n2, n3].connections)
+    n1 = Node(exec=lambda state: "n2")
+    n2 = Node(exec=lambda state: "n3")
+    n3 = Node(exec=lambda state: "n4")
+    n4 = Node(exec=lambda state: "exit")
+    s1 = Supervisor()
+    # fmt: off
+    s1[n1, n2, n3] >> n4; title=get_code_line()[0]
+    # fmt: on
+    # # print(s1.render_mermaid())
+    print(s1.render_mermaid(saved_file="assets/supervisor_mermaid.png", title=title))
 
 
 class Swarm(Flow):
@@ -854,14 +862,16 @@ if __name__ == "__main__":
     s2 = Swarm()
     s3 = Swarm()
 
-    # s1[n1, n2, n3,n4];title=get_code_line()
+    # fmt: off
+    s1[n1, n2, n3,n4];title=get_code_line()[0]
+    # s1[n1, n2, n3,n4];title=get_code_line()[0]
     # n1 >> s1[n2, n3] >> n4;title=get_code_line()
-    s1[n1, n2] >> s2[n3, n4]
-    title = get_code_line()
+    # s1[n1, n2] >> s2[n3, n4];title = get_code_line()
+    # fmt: on
 
     # 绘制流程图
     # print(s1.render_dot(saved_file="assets/swarm_dot.png"))
-    print(s1.render_mermaid(saved_file="assets/swarm_mermaid3.png", title=title))
+    # print(s1.render_mermaid(saved_file="assets/swarm_mermaid.png", title=title))
 
     # 连接关系
     # # 蜂群容器

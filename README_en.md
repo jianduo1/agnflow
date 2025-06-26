@@ -5,7 +5,7 @@
   <h3>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
     <a href="https://jianduo1.github.io/agnflow/"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Docs"></a>
-    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/pypi/v/agnflow.svg" alt="PyPI"></a>
+    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/badge/pypi-v0.1.0-blue.svg" alt="PyPI"></a>
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
   </h3>
 </div>
@@ -13,6 +13,13 @@
 [中文](README.md) | English 
 
 **agnflow** pursues simplicity, ease of use, and extensibility, suitable for rapid prototyping, customized LLM workflows, and Agent task flows.
+
+## 🎯 Core Features Showcase
+
+| Basic Swarm Connection | Node-Swarm Connection | Multiple Swarm Connection |
+|:---------------------:|:--------------------:|:-------------------------:|
+| ![](assets/swarm_mermaid1.png) | ![](assets/swarm_mermaid2.png) | ![](assets/swarm_mermaid3.png) |
+| Connection and collaboration between swarm agents | Flexible connection between nodes and swarms | Combination and extension of multiple swarms |
 
 ## 1. TODO (Future Extension Directions)
 
