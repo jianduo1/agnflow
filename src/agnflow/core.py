@@ -135,9 +135,17 @@ class Connection:
 
         def convert_to_conn_list(objs) -> "list[Connection]":
             if isinstance(objs, Connection):
-                return [objs]
+                # 如果是 Connection 子类（如 Node、Flow...），直接返回
+                if objs.__class__ != Connection:
+                    return [objs]
+                # 如果是 Connection 本身，返回其 chains 中的第一个节点
+                return [objs.chains[0]]
             elif isinstance(objs, (list, tuple)):
-                return [*objs]
+                # 如果是列表，递归处理每个元素
+                result = []
+                for obj in objs:
+                    result.extend(convert_to_conn_list(obj))
+                return result
             return []
 
         # 获取当前链路的最后一个节点作为目标
@@ -421,7 +429,9 @@ class Connection:
     def render_mermaid(self, saved_file: str = None, title: str = ""):
 
         # 对 title 进行 YAML 安全处理，移除所有特殊字符
-        safe_title = str(title).replace('"', '').replace("'", "").replace("[", "").replace("]", "").replace("\n", " ").strip()
+        safe_title = (
+            str(title).replace('"', "").replace("'", "").replace("[", "").replace("]", "").replace("\n", " ").strip()
+        )
         if not safe_title:
             safe_title = ""
         config_block = f"""---\ntitle: "{title}"\nconfig:\n  look: handDrawn\n---\n"""
@@ -459,9 +469,18 @@ class Connection:
                             label = f"{label1} / {label2}".strip(" / ")
                         else:
                             label = ""
-                        edge_str = (
-                            f"    {src.name} <--> |{label}| {tgt.name}" if label else f"    {src.name} <--> {tgt.name}"
-                        )
+                        
+                        # 根据是否有反向连接决定箭头类型
+                        if reverse_label:
+                            # 有反向连接，使用双向箭头
+                            edge_str = (
+                                f"    {src.name} <--> |{label}| {tgt.name}" if label else f"    {src.name} <--> {tgt.name}"
+                            )
+                        else:
+                            # 只有单向连接，使用单向箭头
+                            edge_str = (
+                                f"    {src.name} --> |{label}| {tgt.name}" if label else f"    {src.name} --> {tgt.name}"
+                            )
                         cluster_internal_edges.append((cluster.name, edge_str))
                         processed_pairs.add(pair)
                     else:
@@ -519,8 +538,8 @@ if __name__ == "__main__":
     c5 = Connection()
     flow = Connection()
     # print((c1 >> c2 >> c3).chains)
-    # print((c1 << [c2, c3] << c4).connections)
-    # print((c1 << flow[c2, c3 >> c5] << c4).connections)
+    # print((c1 << [c2, c3] << c4
+    # print((c1 << flow[c2, c3 >> c5] << c4
     # print((c1 << flow[c2, c3 >> c5] << c4).hidden_connections)
 
 
@@ -640,8 +659,12 @@ if __name__ == "__main__":
     n2 = Node()
     n3 = Node()
     n4 = Node()
-    # print((n1 >> [n2, n3] >> n4).connections)
-    # print((n1 << n2 << n3).connections)
+    n5 = Node()
+    # fmt: off
+    # n1 >> [n2 >> n3, n3 >>n4] >> n5; title=get_code_line()[0]
+    # fmt: on
+    # print(n1.connections)
+    # print(n1.render_mermaid(saved_file="assets/node_mermaid.png", title=title))
 
 
 class Flow(Connection):
@@ -776,10 +799,19 @@ class Flow(Connection):
 
 
 if __name__ == "__main__":
+    n1 = Node()
+    n2 = Node()
+    n3 = Node()
+    n4 = Node()
     f1 = Flow()
-    # print(f1[n1:n4:n2])
-    # print(f1[n1 : [n3, n4 ]].connections)
-    # print(f1[n1 : [n3, n4 >> n2 >> n3]].all_connections)
+    f2 = Flow()
+    f3 = Flow()
+    # fmt: off
+    # f1[n1 >> n2 >> f2[n3]] >> f3[n4];title=get_code_line()[0]
+    # fmt: on
+    # print(f1.connections)
+    # print(f1.hidden_connections)
+    # print(f1.render_mermaid(saved_file="assets/flow_mermaid.png", title=title))
 
 
 class Supervisor(Flow):
@@ -818,10 +850,10 @@ if __name__ == "__main__":
     n4 = Node(exec=lambda state: "exit")
     s1 = Supervisor()
     # fmt: off
-    s1[n1, n2, n3] >> n4; title=get_code_line()[0]
+    # s1[n1, n2, n3] >> n4; title=get_code_line()[0]
     # fmt: on
     # # print(s1.render_mermaid())
-    print(s1.render_mermaid(saved_file="assets/supervisor_mermaid.png", title=title))
+    # print(s1.render_mermaid(saved_file="assets/supervisor_mermaid.png", title=title))
 
 
 class Swarm(Flow):
