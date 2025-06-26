@@ -44,11 +44,6 @@ dev-dependencies = [
     "black>=23.0.0",
     "isort>=5.12.0",
     "flake8>=6.0.0",
-    "mkdocs>=1.5.0",
-    "mkdocs-material>=9.0.0",
-    "mkdocs-git-revision-date-localized-plugin>=1.2.0",
-    "mkdocs-minify-plugin>=0.7.0",
-    "ghp-import>=2.1.0",
     "build>=1.2.2.post1",
     "twine>=6.1.0",
 ]
@@ -60,11 +55,6 @@ format = "black ."
 format-check = "black --check ."
 lint = "flake8 ."
 sort = "isort ."
-
-# 文档构建与部署
-docs-build = "mkdocs build"
-docs-serve = "mkdocs serve"
-docs-deploy = "ghp-import site -p -m 'Deploy documentation to GitHub Pages' -r origin"
 
 # 构建和发布
 build = "python -m build"

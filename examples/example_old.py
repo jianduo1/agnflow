@@ -3,10 +3,13 @@ agnflow 用法示例
 """
 
 from typing import TypedDict
+import asyncio
 from agnflow import Node, Flow
 
 
 # ✨一、状态定义（使用TypedDict）
+
+
 class State(TypedDict):
     data: str
 
@@ -57,33 +60,25 @@ class C(Node):
 
 # 方法2：使用函数和Node的exec和aexec参数
 def d1_exec(data):
-    print(f"d1 exec {data}")
-    return "default", {"data": "test:d1"}
+    return "a", {"data": "test:d1"}
 
 
 async def d1_aexec(data):
-    print(f"d1 aexec {data}")
-    return "default"  # 返回 action，用于导航到下一个节点
+    return "a"  # 返回 action，用于导航到下一个节点
 
 
 def d2_exec(state): ...
-
-
 async def d2_aexec(state):
-    print(f"d2 aexec {state}")
     return "a", {"data": "test:d2"}
 
 
-a = A()
-b = B()
-c = C()
-b2 = C()
-d1 = Node(exec=d1_exec, aexec=d1_aexec)
-d2 = Node(exec=d2_exec, aexec=d2_aexec)
-
-flow = Flow()
-flow2 = Flow()
-flow3 = Flow()
+a = A("a")
+b = B("b")
+c = C("c")
+b2 = C("b2")
+flow3 = Flow(b2, name="flow3")
+d1 = Node("d1", exec=d1_exec, aexec=d1_aexec)
+d2 = Node("d2", exec=d2_exec, aexec=d2_aexec)
 
 # ✨三、连接工作流节点（a指向b和c，c指向a）
 
@@ -94,46 +89,21 @@ flow3 = Flow()
 # c << "c" << b << "b" << a
 
 # 方法3：循环多分支
-# a >> {"b": b >> {"b2": flow3 >> b2}, "c": c >> {"a": a}}
+a >> {"b": b >> {"b2": flow3}, "c": c >> {"a": a}}
 
 # ✨五、连接主工作流节点（d1指向子工作流，子工作流指向d2）
 
-# flow = Flow(name="flow")
-# d1 >> flow
-# flow2 = Flow(name="flow2")
-
-# flow2 >> d1 >> {"a": flow >> a >> {"b": b >> {"b2": flow3 >> b2}, "c": c >> {"a": a}}} >> d2
-flow2[d1 >> {"a": flow[a >> {"b": b >> {"b2": flow3 >> b2}, "c": c >> {"a": a}}]}] >> d2
-
-"""
-a1 >> flow[b1 >> b2] >> a2
-
-等价于
-
-a1:flow
-flow:a2
-
-等价于
-
-a1:[b1,b2]
-b1:b2
-b2:a2
-a2:None
-"""
+flow = Flow(a, name="flow")
+d1 >> flow >> d2
+flow2 = Flow(d1, name="flow2")
 
 if __name__ == "__main__":
+    # ✨六、同步执行工作流
     flow2.run(state)
 
-    def f():
-        # ✨六、同步执行工作流
-        flow2.run(state)
-        # print(flow2.to_dict())
-        print(flow2.names)
-
-    # f()
     # ✨七、异步执行工作流
-    # asyncio.run(flow2.arun(state))
+    asyncio.run(flow2.arun(state))
 
     # ✨八、绘制流程图
     print(flow2.render_dot(saved_file="./assets/flow_dot.png"))
-    # print(flow2.render_mermaid(saved_file="./assets/flow_mermaid.png"))
+    print(flow2.render_mermaid(saved_file="./assets/flow_mermaid.png"))

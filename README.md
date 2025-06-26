@@ -2,12 +2,12 @@
   <h1>agnflow</h1>
   <strong>一个简洁的 Python 智能体工作流引擎</strong>
   <br>
-  <p>
+  <h3>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
     <a href="https://jianduo1.github.io/agnflow/"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Docs"></a>
     <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/pypi/v/agnflow.svg" alt="PyPI"></a>
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
-  </p>
+  </h3>
 </div>
 
 中文 | [English](README_en.md)
@@ -458,8 +458,44 @@ agnflow 参考和对标了以下主流智能体/工作流框架：
 
 agnflow 参考和对标了以下主流智能体/工作流框架：
 
-![LangGraph](https://img.shields.io/badge/LangGraph-green.svg) ![LlamaIndex](https://img.shields.io/badge/LlamaIndex-green.svg) ![AutoGen](https://img.shields.io/badge/AutoGen-green.svg) ![Haystack](https://img.shields.io/badge/Haystack-green.svg) ![CrewAI](https://img.shields.io/badge/CrewAI-green.svg) ![FastGPT](https://img.shields.io/badge/FastGPT-green.svg) ![PocketFlow](https://img.shields.io/badge/PocketFlow-green.svg)
+![LangGraph](https://img.shields.io/badge/LangGraph-green.svg) 
+![LlamaIndex](https://img.shields.io/badge/LlamaIndex-green.svg) 
+![AutoGen](https://img.shields.io/badge/AutoGen-green.svg) 
+![Haystack](https://img.shields.io/badge/Haystack-green.svg) 
+![CrewAI](https://img.shields.io/badge/CrewAI-green.svg) 
+![FastGPT](https://img.shields.io/badge/FastGPT-green.svg) 
+![PocketFlow](https://img.shields.io/badge/PocketFlow-green.svg)
 
 ## 11. 许可证
 MIT
 
+
+```mermaid
+graph TB
+    D --> A
+    E --> F
+
+    subgraph E
+        A((A)) --> B((B))
+        A --> C((C))
+    end
+```
+
+```dot
+digraph {
+    D -> A;
+
+    subgraph cluster_E {
+        label="E";
+        //A -> B ;
+        //B -> C;
+        //C -> A;
+        //B -> A;
+        A -> B[dir=both];
+        A -> C[dir=both];
+        B -> C[dir=both];
+        E[shape=point, width=0, height=0, label=""];
+    }
+    E -> F;
+}
+```

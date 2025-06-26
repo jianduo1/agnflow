@@ -861,11 +861,11 @@ if __name__ == "__main__":
     response = call_llm(prompt)
     print(f"## 响应: {response}")
 
-    print("## 测试 search_web")
-    query = "谁获得了2024年诺贝尔物理学奖？"
-    print(f"## 查询: {query}")
-    results = search_web_duckduckgo(query)
-    print(f"## 结果: {results}")
+    # print("## 测试 search_web")
+    # query = "谁获得了2024年诺贝尔物理学奖？"
+    # print(f"## 查询: {query}")
+    # results = search_web_duckduckgo(query)
+    # print(f"## 结果: {results}")
 
     print("## 测试 Memory 功能")
     memory = create_memory_system()

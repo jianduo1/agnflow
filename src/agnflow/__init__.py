@@ -5,7 +5,7 @@ Agnflow - 一个简洁的工作流引擎
 支持智能体算法和工作流编排的集成。
 """
 
-from .core import Node, Flow, Conn
+from .core import Node, Flow, _Conn
 
 # 智能体工作流功能
 try:
@@ -40,7 +40,7 @@ except ImportError:
 __version__ = "0.1.0"
 
 # 核心功能
-__all__ = ["Node", "Flow", "Conn"]
+__all__ = ["Node", "Flow", "_Conn"]
 
 # 如果智能体功能可用，添加到导出列表
 if AGENTS_AVAILABLE:

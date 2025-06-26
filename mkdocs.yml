@@ -13,23 +13,46 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
+    - navigation.expand
     - navigation.top
     - search.suggest
     - search.highlight
     - content.code.copy
+    - content.code.annotate
   palette:
     - scheme: default
       primary: indigo
       accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: 切换主题
     - scheme: slate
       primary: indigo
       accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: 切换主题
 
 markdown_extensions:
   - admonition
   - codehilite
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.smartsymbols
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - md_in_html
+  - def_list
+  - footnotes
+  - toc:
+      permalink: true
 
 plugins:
   - search
@@ -37,6 +60,11 @@ plugins:
       enable_creation_date: true
   - minify:
       minify_html: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jianduo1/agnflow
 
 nav:
   - 首页: index.md
