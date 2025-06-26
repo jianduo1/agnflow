@@ -807,11 +807,11 @@ if __name__ == "__main__":
     f2 = Flow()
     f3 = Flow()
     # fmt: off
-    # f1[n1 >> n2 >> f2[n3]] >> f3[n4];title=get_code_line()[0]
+    f1[n1 >> n2 >> f2[n3]] >> f3[n4];title=get_code_line()[0]
     # fmt: on
-    # print(f1.connections)
-    # print(f1.hidden_connections)
-    # print(f1.render_mermaid(saved_file="assets/flow_mermaid.png", title=title))
+    print(f1.connections)
+    print(f1.hidden_connections)
+    print(f1.render_mermaid(saved_file="assets/flow_mermaid.png", title=title))
 
 
 class Supervisor(Flow):
