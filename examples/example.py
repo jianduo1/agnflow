@@ -58,20 +58,22 @@ class C(Node):
 # 方法2：使用函数和Node的exec和aexec参数
 def d1_exec(data):
     print(f"d1 exec {data}")
-    return "default", {"data": "test:d1"}
+    return "a", {"data": "test:d1"}
 
 
 async def d1_aexec(data):
     print(f"d1 aexec {data}")
-    return "default"  # 返回 action，用于导航到下一个节点
+    return "a"  # 返回 action，用于导航到下一个节点
 
 
-def d2_exec(state): ...
+def d2_exec(state):
+    print(f"d2 exec {state}")
+    return "exit"
 
 
 async def d2_aexec(state):
     print(f"d2 aexec {state}")
-    return "a", {"data": "test:d2"}
+    return "exit", {"data": "test:d2"}
 
 
 a = A()
@@ -85,55 +87,21 @@ flow = Flow()
 flow2 = Flow()
 flow3 = Flow()
 
-# ✨三、连接工作流节点（a指向b和c，c指向a）
+# ✨三、连接工作流节点
+# 示例
+# a >> "b" >> b >> "c" >> c  # 正向连接
+# c << "c" << b << "b" << a  # 反向连接
+# a >> [b >> flow3 >> b2, c >> a]  # 循环多分支
 
-# 方法1：正向
-# a >> "b" >> b >> "c" >> c
 
-# 方法2：反向
-# c << "c" << b << "b" << a
+flow2[d1 >> [flow[a >> [b >> flow3[b2], c >> a]]]] >> d2
 
-# 方法3：循环多分支
-# a >> {"b": b >> {"b2": flow3 >> b2}, "c": c >> {"a": a}}
+# print(flow2.hidden_connections)
+# print(flow2.connections)
 
-# ✨五、连接主工作流节点（d1指向子工作流，子工作流指向d2）
+# ✨四、执行工作流
+# flow2.run(state)
+# asyncio.run(flow2.arun(state))
 
-# flow = Flow(name="flow")
-# d1 >> flow
-# flow2 = Flow(name="flow2")
-
-# flow2 >> d1 >> {"a": flow >> a >> {"b": b >> {"b2": flow3 >> b2}, "c": c >> {"a": a}}} >> d2
-flow2[d1 >> {"a": flow[a >> {"b": b >> {"b2": flow3 >> b2}, "c": c >> {"a": a}}]}] >> d2
-
-"""
-a1 >> flow[b1 >> b2] >> a2
-
-等价于
-
-a1:flow
-flow:a2
-
-等价于
-
-a1:[b1,b2]
-b1:b2
-b2:a2
-a2:None
-"""
-
-if __name__ == "__main__":
-    flow2.run(state)
-
-    def f():
-        # ✨六、同步执行工作流
-        flow2.run(state)
-        # print(flow2.to_dict())
-        print(flow2.names)
-
-    # f()
-    # ✨七、异步执行工作流
-    # asyncio.run(flow2.arun(state))
-
-    # ✨八、绘制流程图
-    print(flow2.render_dot(saved_file="./assets/flow_dot.png"))
-    # print(flow2.render_mermaid(saved_file="./assets/flow_mermaid.png"))
+# ✨五、绘制流程图
+print(flow2.render_mermaid(saved_file="./assets/example_mermaid.png"))

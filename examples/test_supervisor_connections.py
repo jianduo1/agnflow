@@ -78,9 +78,9 @@ def test_supervisor_execution():
     worker2 = Node(name="worker2", exec=worker2_func)
     
     # 先用 >> 建立链路
-    supervisor >> {"worker1": worker1, "worker2": worker2}
-    worker1 >> {"supervisor": supervisor, "worker2": worker2}
-    worker2 >> {"supervisor": supervisor, "worker1": worker1}
+    supervisor >> [worker1, worker2]
+    worker1 >> [supervisor, worker2]
+    worker2 >> [supervisor, worker1]
     # 用 Supervisor 注册所有节点
     s = Supervisor()
     s[supervisor, worker1, worker2]
@@ -132,7 +132,7 @@ def test_supervisor_conditional_execution():
 
     # 建立分支跳转链路
     s = Supervisor()
-    # supervisor >> {"approve": approve_worker, "reject": reject_worker}
+    # supervisor >> [approve_worker, reject_worker]
     s[supervisor, approve_worker, reject_worker]
 
     # 在 Supervisor 内部建立连接关系

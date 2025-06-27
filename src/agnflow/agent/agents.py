@@ -4,7 +4,7 @@
 """
 
 from typing import Dict, Any, List, Optional, Callable
-from .core import Node, Flow
+from ..core import Node, Flow
 from .utils import (
     call_llm,
     get_embedding,

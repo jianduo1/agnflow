@@ -38,7 +38,7 @@ def test_conditional_workflow():
     
     # 创建工作流
     flow = Flow()
-    flow[start >> {'branch_a': branch_a, 'branch_b': branch_b} >> end]
+    flow[start >> [branch_a, branch_b] >> end]
     
     # 测试分支A
     print("测试分支A:")
@@ -82,7 +82,7 @@ def test_loop_workflow():
     
     # 创建工作流
     flow = Flow()
-    flow[counter >> {'continue': counter, 'end': end}]
+    flow[counter >> [counter, end]]
     
     # 执行循环工作流
     state = {'initial': 'test'}

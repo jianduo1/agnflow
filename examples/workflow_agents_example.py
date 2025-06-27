@@ -8,13 +8,13 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from agnflow.agents import (
+from agnflow.agent.agents import (
     create_react_workflow, create_tao_workflow, create_cot_workflow, create_rag_workflow,
     create_llm_node, create_search_node, create_memory_node, create_rag_node, create_tool_node,
     LLMNode, SearchNode, MemoryNode, RAGNode, ToolNode
 )
 from agnflow.core import Flow
-from agnflow.utils import create_tool_manager
+from agnflow.agent.utils import create_tool_manager
 
 
 def example_basic_nodes():

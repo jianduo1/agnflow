@@ -1,19 +1,4 @@
-"""
 
-### TODO 清单
-
-- [x] llm
-- [x] memory
-- [x] rag
-- [x] mcp tool
-- [x] ReAct(reasoning + action)
-- [x] TAO(thought + action + observation)
-- [x] ToT(Chain of Thought)
-- [x] CoT(Chain of Thought)
-- [x] hitl(human in the loop)
-- [x] supervisor swarm
-
-"""
 
 from typing import Literal, List, Dict
 import os
