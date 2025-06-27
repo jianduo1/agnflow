@@ -374,8 +374,8 @@ class Connection:
                 if s != 0:
                     warnings.warn(f"dot 生成图片失败，检查 dot 是否安装（brew install graphviz）: {o}")
                 else:
-                    print(f"图片已保存为: {saved_file}")
-        return viz_str
+                    return viz_str, saved_filepath
+        return viz_str, None
 
     def to_mermaid(self, depth=0, visited=None):
         """将节点及其连接渲染为mermaid格式（只用connections和conntainer）"""
@@ -415,7 +415,6 @@ class Connection:
         cluster_name_map = {}
         for cluster in clusters:
             members = self.conntainer.get(cluster, []) if hasattr(self, "conntainer") else []
-            print(cluster, members)
             # 过滤掉非Connection对象
             members = [m for m in members if isinstance(m, Connection)]
             member_names = set(n.name for n in members)
@@ -505,8 +504,8 @@ class Connection:
                         "- npx puppeteer browsers install chrome-headless-shell"
                     )
                 else:
-                    print(f"图片已保存为: {saved_file}")
-        return viz_str
+                    return viz_str, saved_filepath
+        return viz_str, None
 
     # endregion
 

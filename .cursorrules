@@ -1,5 +1,5 @@
 # 项目编码规范
 
 - 使用类型提示 (Type Hints)
-- 修改完README.md后，请同步更新的README_en.md
+- 修改完README_zh.md后，请同步更新的README.md
 
