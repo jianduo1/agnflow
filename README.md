@@ -35,7 +35,7 @@
 - [ ] TAO (thought + action + observation)
 - [ ] ToT (Tree of Thought)
 - [ ] CoT (Chain of Thought)
-- [ ] hitl (human in the loop)
+- [X] hitl (human in the loop, CLI & API)
 - [X] 👏🏻 supervisor swarm
 
 > The above are future extensible intelligent agent/reasoning/tool integration directions. Contributions and suggestions are welcome.
@@ -196,6 +196,35 @@ print(flow.render_mermaid())  # Output mermaid format
 # Save as image file
 flow.render_dot(saved_file="./flow.png")      # Save dot format image
 flow.render_mermaid(saved_file="./flow.png")  # Save mermaid format image
+```
+
+### 4.5 Human-in-the-Loop (HITL) Example
+
+#### CLI Mode
+```python
+from agnflow.agent.hitl.cli import human_in_the_loop
+result, approved = human_in_the_loop("Please review this data", input_data={"foo": 123})
+print(result, approved)
+```
+
+#### API Mode (FastAPI)
+1. Start the FastAPI service:
+```python
+from agnflow.agent.hitl.api import get_hitl_router
+from fastapi import FastAPI
+app = FastAPI()
+app.include_router(get_hitl_router())
+```
+2. Use curl to interact:
+```bash
+# Create a review task
+response=$(curl -s -X POST "http://127.0.0.1:8000/hitl/tasks/" -H "Content-Type: application/json" -d '{"prompt": "Please review", "input_data": {"foo": 123}}')
+echo $response | jq
+task_id=$(jq -r '.task_id' <<< "$response")
+# Query task
+curl -s "http://127.0.0.1:8000/hitl/tasks/$task_id" | jq
+# Submit review
+curl -s -X POST "http://127.0.0.1:8000/hitl/tasks/$task_id/submit" -H "Content-Type: application/json" -d '{"approve": true, "result": "Approved"}' | jq
 ```
 
 ## 5. Node Function Details

@@ -115,7 +115,7 @@ class Node(Connection):
 
 
 if __name__ == "__main__":
-    from agnflow.core.utils import get_code_line
+    from agnflow.utils.code import get_code_line
 
     n1 = Node()
     n2 = Node()

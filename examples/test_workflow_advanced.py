@@ -7,7 +7,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from agnflow.core import Node, Flow
+from agnflow import Node, Flow
 
 def test_conditional_workflow():
     """测试条件工作流"""

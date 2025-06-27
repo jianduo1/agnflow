@@ -3,8 +3,7 @@ import asyncio, tempfile, subprocess, warnings
 from pathlib import Path
 import re
 
-from agnflow.core.utils import get_code_line
-
+from agnflow.utils.code import get_code_line
 
 class Connection:
     """连接关系（节点与容器）

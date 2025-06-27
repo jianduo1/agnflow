@@ -35,9 +35,10 @@
 - [ ] TAO (thought + action + observation)
 - [ ] ToT (Tree of Thought)
 - [ ] CoT (Chain of Thought)
-- [ ] hitl (human in the loop)
+- [X] hitl (human in the loop, CLI & API)
 - [X] 👏🏻 supervisor swarm
-
+- [ ] multi-agent 分布式通信：socket、zeromq、redis pub/sub ...
+ 
 > 以上为未来可扩展的智能体/推理/工具集成方向，欢迎贡献和建议。
 
 ## 2. 特性
@@ -196,6 +197,35 @@ print(flow.render_mermaid())  # 输出mermaid格式
 # 保存为图片文件
 flow.render_dot(saved_file="./flow.png")      # 保存dot格式图片
 flow.render_mermaid(saved_file="./flow.png")  # 保存mermaid格式图片
+```
+
+### 4.5 人工审核（HITL）示例
+
+#### CLI 模式
+```python
+from agnflow.agent.hitl.cli import human_in_the_loop
+result, approved = human_in_the_loop("请审核此数据", input_data={"foo": 123})
+print(result, approved)
+```
+
+#### API 模式（FastAPI）
+1. 启动 FastAPI 服务：
+```python
+from agnflow.agent.hitl.api import get_hitl_router
+from fastapi import FastAPI
+app = FastAPI()
+app.include_router(get_hitl_router())
+```
+2. 使用 curl 交互：
+```bash
+# 创建审核任务
+response=$(curl -s -X POST "http://127.0.0.1:8000/hitl/tasks/" -H "Content-Type: application/json" -d '{"prompt": "请审核", "input_data": {"foo": 123}}')
+echo $response | jq
+task_id=$(jq -r '.task_id' <<< "$response")
+# 查询任务
+curl -s "http://127.0.0.1:8000/hitl/tasks/$task_id" | jq
+# 提交审核
+curl -s -X POST "http://127.0.0.1:8000/hitl/tasks/$task_id/submit" -H "Content-Type: application/json" -d '{"approve": true, "result": "同意"}' | jq
 ```
 
 ## 5. 节点函数详解

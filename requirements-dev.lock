@@ -15,6 +15,7 @@ annotated-types==0.7.0
 anyio==4.9.0
     # via httpx
     # via openai
+    # via starlette
 black==25.1.0
 build==1.2.2.post1
 certifi==2025.6.15
@@ -26,15 +27,19 @@ charset-normalizer==3.4.2
 click==8.2.1
     # via black
     # via duckduckgo-search
+    # via uvicorn
 distro==1.9.0
     # via openai
 docutils==0.21.2
     # via readme-renderer
 duckduckgo-search==8.0.4
     # via agnflow
+fastapi==0.115.14
+    # via agnflow
 flake8==7.3.0
 h11==0.16.0
     # via httpcore
+    # via uvicorn
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
@@ -97,6 +102,8 @@ primp==0.15.0
 pycodestyle==2.14.0
     # via flake8
 pydantic==2.11.7
+    # via agnflow
+    # via fastapi
     # via openai
 pydantic-core==2.33.2
     # via pydantic
@@ -135,6 +142,8 @@ scipy==1.15.3
 sniffio==1.3.1
     # via anyio
     # via openai
+starlette==0.46.2
+    # via fastapi
 threadpoolctl==3.6.0
     # via scikit-learn
 tqdm==4.67.1
@@ -142,6 +151,7 @@ tqdm==4.67.1
 twine==6.1.0
 typing-extensions==4.14.0
     # via anyio
+    # via fastapi
     # via openai
     # via pydantic
     # via pydantic-core
@@ -151,3 +161,5 @@ typing-inspection==0.4.1
 urllib3==2.5.0
     # via requests
     # via twine
+uvicorn==0.34.3
+    # via agnflow

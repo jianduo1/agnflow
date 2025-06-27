@@ -1,49 +1,43 @@
-#!/usr/bin/env python3
-"""
-测试 Supervisor 连接关系
-"""
-
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from agnflow.core import Node, Flow, Supervisor
 import random
+
+from agnflow import Node, Supervisor
+
 
 def test_supervisor_basic_connections():
     """测试 Supervisor 基本连接关系"""
     print("=== 测试 Supervisor 基本连接关系 ===")
-    
+
     # 创建节点
     n1 = Node()
     n2 = Node()
     n3 = Node()
-    
+
     # 创建 Supervisor
     s = Supervisor()
-    
+
     # 测试 Supervisor[n1, n2, n3] 的连接关系
     # 第一个参数为监督者，其余为被监督者
     s[n1, n2, n3]
-    
+
     print(f"Supervisor节点: {s.connections.get(s, {}).get('nodes', [])}")
     print(f"Supervisor连接: {s.connections}")
-    
+
     # 验证连接关系
     # n1 应该连接到 n2 和 n3
     n1_connections = s.connections.get(n1, {})
     assert 'n2' in n1_connections, "n1 应该连接到 n2"
     assert 'n3' in n1_connections, "n1 应该连接到 n3"
-    
+
     # n2 应该连接到 n1
     n2_connections = s.connections.get(n2, {})
     assert 'n1' in n2_connections, "n2 应该连接到 n1"
-    
+
     # n3 应该连接到 n1
     n3_connections = s.connections.get(n3, {})
     assert 'n1' in n3_connections, "n3 应该连接到 n1"
-    
+
     print("✓ Supervisor 基本连接关系测试通过\n")
+
 
 def test_supervisor_execution():
     """测试 Supervisor 执行功能（Swarm风格随机流转）"""

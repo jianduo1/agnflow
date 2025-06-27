@@ -8,7 +8,7 @@ import os
 import random
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from agnflow.core import Node, Flow, Swarm
+from agnflow import Node, Swarm
 
 def test_swarm_basic_connections():
     """测试 Swarm 基本连接关系"""

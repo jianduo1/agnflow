@@ -3,8 +3,9 @@ from typing import Any
 from agnflow.core.connection import Connection
 from agnflow.core.node import Node
 
+
 class Flow(Connection):
-    """工作流容器 - 管理多个节点的执行流程"""
+    """工作流容器"""
 
     def __init__(self, name: str = None):
         super().__init__(name=name)
@@ -136,21 +137,37 @@ class Flow(Connection):
 
 if __name__ == "__main__":
     from agnflow.core.node import Node
-    from agnflow.core.utils import get_code_line
+    from agnflow.utils.code import get_code_line
 
-    n1 = Node()
-    n2 = Node()
-    n3 = Node()
-    n4 = Node()
-    f1 = Flow()
-    f2 = Flow()
-    f3 = Flow()
-    # fmt: off
-    f1[n1 >> n2 >> f2[n3]] >> f3[n4];title=get_code_line()[0]
-    # fmt: on
-    print(f1.connections)
-    print(f1.hidden_connections)
-    print(f1.render_mermaid(saved_file="assets/flow_mermaid.png", title=title))
+    # n1 = Node()
+    # n2 = Node()
+    # n3 = Node()
+    # n4 = Node()
+    # f1 = Flow()
+    # f2 = Flow()
+    # f3 = Flow()
+    # # fmt: off
+    # f1[n1 >> n2 >> f2[n3]] >> f3[n4];title=get_code_line()[0]
+    # # fmt: on
+    # print(f1.connections)
+    # print(f1.hidden_connections)
+    # print(f1.render_mermaid(saved_file="assets/flow_mermaid.png", title=title))
+
+    # === HITL 节点集成示例 ===
+    from agnflow.agent.hitl.cli import human_in_the_loop
+
+    def review_node(state):
+        result, approved = human_in_the_loop("请人工审核本节点数据", input_data=state)
+        if approved:
+            return {"review_result": result, "approved": True}
+        else:
+            return "exit", {"review_result": result, "approved": False}
+
+    n1 = Node("review", exec=review_node)
+    n2 = Node("next", exec=lambda state: print("流程继续", state))
+    n1 >> n2
+    flow = Flow(n1, name="hitl_demo")
+    flow.run({"msg": "hello"})
 
 
 class Supervisor(Flow):
