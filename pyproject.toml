@@ -1,6 +1,6 @@
 [project]
 name = "agnflow"
-version = "0.1.3"
+version = "0.1.4"
 description = "一个简洁的 Python 智能体工作流引擎，支持同步与异步节点、分支、循环、流程图渲染。"
 authors = [
     { name = "jianduo1", email = "jianduo1@gmail.com" }
