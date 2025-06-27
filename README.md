@@ -5,7 +5,7 @@
   <h3>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
     <a href="https://jianduo1.github.io/agnflow/"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Docs"></a>
-    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/badge/pypi-v0.1.2-blue.svg" alt="PyPI"></a>
+    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/badge/pypi-v0.1.4-blue.svg" alt="PyPI"></a>
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
   </h3>
 </div>
@@ -61,7 +61,7 @@ rye add agnflow
 poetry add agnflow
 
 # Install specific version
-pip install agnflow==0.1.0
+pip install agnflow==0.1.4
 
 # Install latest development version
 pip install --upgrade agnflow
@@ -448,13 +448,13 @@ agnflow references and benchmarks against the following mainstream intelligent a
 ## 9. Project Status
 
 ### 📦 Release Status
-- **PyPI**: ✅ [v0.1.2](https://pypi.org/project/agnflow/0.1.2/) Released
+- **PyPI**: ✅ [v0.1.4](https://pypi.org/project/agnflow/0.1.4/) Released
 - **GitHub**: ✅ [Open Source Repository](https://github.com/jianduo1/agnflow)
 - **Documentation**: ✅ [API Documentation](docs/API.md) Complete
 - **Testing**: ✅ Functional testing passed
 
 ### 🔄 Version Information
-- **Current Version**: 0.1.2
+- **Current Version**: 0.1.4
 - **Python Support**: 3.8+
 - **License**: MIT
 - **Status**: Beta

@@ -5,7 +5,7 @@
   <h3>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
     <a href="https://jianduo1.github.io/agnflow/"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Docs"></a>
-    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/badge/pypi-v0.1.2-blue.svg" alt="PyPI"></a>
+    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/badge/pypi-v0.1.4-blue.svg" alt="PyPI"></a>
     <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
   </h3>
 </div>
@@ -61,7 +61,7 @@ rye add agnflow
 poetry add agnflow
 
 # 安装特定版本
-pip install agnflow==0.1.0
+pip install agnflow==0.1.4
 
 # 安装最新开发版本
 pip install --upgrade agnflow
@@ -448,13 +448,13 @@ agnflow 参考和对标了以下主流智能体/工作流框架：
 ## 9. 项目状态
 
 ### 📦 发布状态
-- **PyPI**: ✅ [v0.1.2](https://pypi.org/project/agnflow/0.1.2/) 已发布
+- **PyPI**: ✅ [v0.1.4](https://pypi.org/project/agnflow/0.1.4/) 已发布
 - **GitHub**: ✅ [开源仓库](https://github.com/jianduo1/agnflow)
 - **文档**: ✅ [API 文档](docs/API.md) 完整
 - **测试**: ✅ 功能测试通过
 
 ### 🔄 版本信息
-- **当前版本**: 0.1.2
+- **当前版本**: 0.1.4
 - **Python 支持**: 3.8+
 - **许可证**: MIT
 - **状态**: Beta

@@ -37,7 +37,7 @@ try:
 except ImportError:
     UTILS_AVAILABLE = False
 
-__version__ = "0.1.2"
+__version__ = "0.1.4"
 
 # 核心功能
 __all__ = ["Node", "Flow", "Supervisor", "Swarm"]
