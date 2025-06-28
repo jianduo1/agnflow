@@ -1,7 +1,7 @@
 site_name: agnflow
 site_description: 一个简洁的 Python 智能体工作流引擎
 site_author: jianduo1
-site_url: https://jianduo1.github.io/agnflow/zh/
+site_url: https://jianduo1.github.io/agnflow/
 
 repo_name: jianduo1/agnflow
 repo_url: https://github.com/jianduo1/agnflow

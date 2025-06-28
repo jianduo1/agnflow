@@ -1,7 +1,7 @@
 site_name: agnflow
 site_description: A concise Python agent workflow engine
 site_author: jianduo1
-site_url: https://jianduo1.github.io/agnflow/en/
+site_url: https://jianduo1.github.io/agnflow/
 
 repo_name: jianduo1/agnflow
 repo_url: https://github.com/jianduo1/agnflow
