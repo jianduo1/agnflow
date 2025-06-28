@@ -11,6 +11,7 @@
 
 <div align="center">
   <br>
+  <div style="display: flex; justify-content: center; flex-wrap: wrap;">
     <img src="assets/rapid-dev/code-zh.png" alt="agnflow 代码示例" height="300" style="border-radius: 8px 0 0 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
     <img src="assets/rapid-dev/log-zh.png" alt="agnflow 日志输出" height="300" style="border-radius: 0; box-shadow: none; margin-left: 1px;">
     <img src="assets/rapid-dev/mermaid.png" alt="agnflow 流程图" height="300" style="border-radius: 0 8px 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 1px;">
