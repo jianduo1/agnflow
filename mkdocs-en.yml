@@ -1,5 +1,5 @@
 site_name: agnflow
-site_description: 一个简洁的 Python 智能体工作流引擎
+site_description: A concise Python agent workflow engine
 site_author: jianduo1
 site_url: https://github.com/jianduo1/agnflow
 
@@ -7,12 +7,12 @@ repo_name: jianduo1/agnflow
 repo_url: https://github.com/jianduo1/agnflow
 edit_uri: edit/main/docs/
 
-# 指定中文文档目录
-docs_dir: docs/zh
+# 指定英文文档目录
+docs_dir: docs/en
 
 theme:
   name: material
-  language: zh
+  language: en
   features:
     - navigation.tabs
     - navigation.sections
@@ -36,20 +36,20 @@ theme:
     - toc.follow
     - toc.integrate
   palette:
-    # 暗色主题
+    # Dark Theme
     - scheme: slate
       primary: indigo
       accent: deep purple
       toggle:
         icon: material/weather-night
-        name: 切换到亮色主题
-    # 亮色主题
+        name: Switch to Light Theme
+    # Light Theme
     - scheme: default
       primary: blue
       accent: light blue
       toggle:
         icon: material/lightbulb
-        name: 切换到暗色主题
+        name: Switch to Dark Theme
   font:
     text: Roboto
     code: Roboto Mono
@@ -69,6 +69,14 @@ theme:
     fullscreen_exit: material/fullscreen-exit
     top: material/arrow-up
     home: material/home
+
+# Add custom CSS for gradient effects
+extra_css:
+  - stylesheets/extra.css
+
+# Add custom JavaScript
+extra_javascript:
+  - stylesheets/extra.js
 
 markdown_extensions:
   - admonition
@@ -111,18 +119,10 @@ extra:
     - icon: fontawesome/brands/discord
       link: https://discord.gg/agnflow
 
-# 中文导航
+# English navigation
 nav:
-  - 首页: index.md
-  - 快速开始: getting-started.md
-  - 核心概念: core-concepts.md
-  - 示例: examples.md
-  - API 参考: api-reference.md
-
-# 添加自定义CSS来实现渐变效果
-extra_css:
-  - stylesheets/extra.css
-
-# 添加自定义JavaScript
-extra_javascript:
-  - stylesheets/extra.js 
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Core Concepts: core-concepts.md
+  - Examples: examples.md
+  - API Reference: api-reference.md 

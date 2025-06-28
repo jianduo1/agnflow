@@ -1,12 +1,21 @@
-from typing import Any, Self, Dict
+from typing import Any, Dict
 import asyncio, tempfile, subprocess, warnings
 from pathlib import Path
 import re
 
 from agnflow.utils.code import get_code_line
 
+
 class Connection:
     """连接关系（节点与容器）
+
+    特性：
+    - 支持节点与容器关联
+    - 支持容器嵌套容器
+    - 支持复杂连接方式，如切片、全连接
+    - 支持基于action的分支连接
+    - 支持mermaid流程图绘制
+    - 支持运行时动态添加连接
 
     数据：
     - name 通过查询调用堆栈的技术，动态获取当前实例的变量名，作为name属性
@@ -80,14 +89,14 @@ class Connection:
         # return f"{self.__class__.__name__}@{self.name}"
 
     @property
-    def all_connections(self):
+    def all_connections(self) -> "Dict[Connection, Dict[str, Connection]]":
         """合并所有连接"""
         return {
             key: {**self.hidden_connections.get(key, {}), **self.connections.get(key, {})}
             for key in self.hidden_connections | self.connections
         }
 
-    # region 构建节点与容器关联
+    # region 构建流程图（包含节点与容器关联）
     def build_connections(
         self,
         source: "Connection | list | tuple",
@@ -117,31 +126,31 @@ class Connection:
         targets: list[Connection] = convert_to_conn_list(target)
 
         # 建立连接关系，如 a -> b -> flow1[x,y] -> flow2[z,w] -> c
-        # 先构建显式连接 如 a-b-flow1-flow2-c
+        # 1. 先构建显式连接 如 a-b-flow1-flow2-c
         for outer_src in sources:
             outer_src_map: Dict[str, Connection] = self.connections.setdefault(outer_src, {})
             for outer_tgt in targets:
                 outer_src_map[outer_tgt.name] = outer_tgt
 
-                # 后构建隐式连接，如 b-x b-y ，x-z x-w y-z y-w ，z-c w-c
+                # 2.后构建隐式连接，如 b-x b-y ，x-z x-w y-z y-w ，z-c w-c
                 if outer_src in self.conntainer or outer_tgt in self.conntainer:
-                    # outer_src 是 flow[a,b] ，构建 [a,b] 连接到 c
+                    # 2.1 flow[a,b] >> c
                     if outer_src in self.conntainer:
                         inner_sources: list[Connection] = self.conntainer.get(outer_src, [])
                         inner_targets: list[Connection] = [outer_tgt]
-                    # outer_tgt 是 flow[a,b]，构建 c 连接到 [a,b]
+                    # 2.2 c >> flow[a,b]
                     if outer_tgt in self.conntainer:
                         inner_sources: list[Connection] = [outer_src]
                         inner_targets: list[Connection] = self.conntainer.get(outer_tgt, [])
-                    # outer_src 是 flow[a,b] ，outer_tgt 是 flow[c,d]，构建 [a,b] 连接到 [c,d]
+                    # 2.3 flow[a,b] >> flow[c,d]
                     if outer_tgt in self.conntainer and outer_src in self.conntainer:
                         inner_sources: list[Connection] = self.conntainer.get(outer_src, [])
                         inner_targets: list[Connection] = self.conntainer.get(outer_tgt, [])
-                    
+
                     # 确保inner_sources和inner_targets中都是Connection对象
                     inner_sources = [src for src in inner_sources if isinstance(src, Connection)]
                     inner_targets = [tgt for tgt in inner_targets if isinstance(tgt, Connection)]
-                    
+
                     for inner_src in inner_sources:
                         inner_src_map: Dict[str, Connection] = self.hidden_connections.setdefault(inner_src, {})
                         for inner_tgt in inner_targets:
@@ -172,65 +181,89 @@ class Connection:
         # 返回新的链路代理，链路头部插入 source
         return Connection(chains=[source] + self.chains)
 
-    def __getitem__(self, key: "Connection | tuple | list | slice") -> Self:
+    def __sub__(self, target: "Connection | list | tuple") -> "Connection":
+        """重载运算符 - 用于断开连接
+        - c1 - c2 表示断开 c1 到 c2 的连接
+        - c1 - [c2, c3] 表示断开 c1 到 c2, c3 的所有连接
+        - c1 - flow[c2, c3] 表示断开 c1 到容器内所有节点的连接
+        - c1 - c2 - c3 表示链式断开连接
         """
-        重载运算符 []，获取子工作流
+        # 如果 target 是 Connection 且有 chains，说明是链式断开
+        if isinstance(target, Connection) and hasattr(target, 'chains') and len(target.chains) > 1:
+            # 链式断开：c1 - c2 - c3
+            self.disconnect_from(target.chains[0])  # 断开到第一个节点
+            # 返回一个新的 Connection 对象，继续链式操作
+            return Connection(chains=target.chains[1:])
+        else:
+            # 普通断开
+            self.disconnect_from(target)
+            return self
 
-        连接类型：
-        - flow[a] 单节点
-        - flow[a >> b] 链路
-        - flow[a, b] 多节点
-        - flow[a:(b, c):(d, e)] 切片表达式，分段连接
-        - flow[(a, b, c):(a, b, c)] 全连接
-        - 支持action分支（dict）
-        - 预留容器嵌套扩展点
+    def __rsub__(self, source: "Connection | list | tuple") -> "Connection":
+        """重载运算符 - 的右操作数版本
+        - source - self 用于处理链式断开连接
         """
+        if isinstance(source, Connection):
+            source.disconnect_from(self)
+            return source
+        else:
+            # 如果 source 是列表或元组，创建一个临时的 Connection 来处理
+            temp_conn = Connection()
+            temp_conn.disconnect_from(self)
+            return temp_conn
 
-        def to_node_list(obj) -> list[Connection]:
-            """将输入统一转为节点列表"""
-            if isinstance(obj, Connection):
-                return [obj]
-            if isinstance(obj, (tuple, list)):
-                return [*obj]
+    def disconnect_from(self, target: "Connection | list | tuple"):
+        """断开连接的核心逻辑"""
+        def convert_to_conn_list(objs) -> "list[Connection]":
+            if isinstance(objs, Connection):
+                # 如果是 Connection 子类（如 Node、Flow...），直接返回
+                if objs.__class__ != Connection:
+                    return [objs]
+                # 如果是 Connection 本身，返回其 chains 中的所有节点
+                return [objs.chains[0]]
+            elif isinstance(objs, (list, tuple)):
+                # 如果是列表，递归处理每个元素
+                result = []
+                for obj in objs:
+                    # 递归处理每个元素，确保结果都是Connection对象
+                    sub_result = convert_to_conn_list(obj)
+                    result.extend(sub_result)
+                return result
             return []
 
-        conntainer: list[Connection] = self.conntainer.setdefault(self, [])
+        sources = [self.chains[-1]]  # 当前链路的最后一个节点
+        targets = convert_to_conn_list(target)
 
-        # ⭐️ 处理切片表达式 flow[a:(b,c)]
-        if isinstance(key, slice):
-            # 支持三段式切片：start:stop:step
-            starts: list[Connection] = to_node_list(key.start)
-            stops: list[Connection] = to_node_list(key.stop)
-            steps: list[Connection] = to_node_list(key.step)
-            # 构建工作流内部的显式连接 start->stop, stop->step
-            for srcs, tgts in ((starts, stops), (stops, steps)):
-                for src in srcs:
-                    for tgt in tgts:
-                        # 忽略自连接和空节点
-                        if src is tgt or src is None or tgt is None:
-                            continue
-                        # 加入容器
-                        if src not in conntainer:
-                            conntainer.append(src)
-                        if tgt not in conntainer:
-                            conntainer.append(tgt)
-                        # 建立连接
-                        src_map: Dict[str, Connection] = self.connections.setdefault(src, {})
-                        src_map[tgt.name] = tgt
+        # 1. 断开显式连接
+        for src in sources:
+            if src in self.connections:
+                for tgt in targets:
+                    if tgt.name in self.connections[src]:
+                        del self.connections[src][tgt.name]
+                # 如果该源节点的连接映射为空，删除整个映射
+                if not self.connections[src]:
+                    del self.connections[src]
 
-        # ⭐️ 处理连接类型 flow[a>>b>>a]（a-b-a需要去重）
-        elif isinstance(key, Connection):
-            # 添加到容器，可以用于绘制mermaid流程图，{chain:[a,b]}
-            for node in key.chains:
-                if node not in conntainer:
-                    conntainer.append(node)
+        # 2. 断开隐式连接
+        for src in sources:
+            if src in self.hidden_connections:
+                for tgt in targets:
+                    if tgt.name in self.hidden_connections[src]:
+                        del self.hidden_connections[src][tgt.name]
+                if not self.hidden_connections[src]:
+                    del self.hidden_connections[src]
 
-        # ⭐️ 处理连接数组类型 flow[a,b,c]
-        elif isinstance(key, (tuple, list)):
-            for node in key:
-                self.__getitem__(node)
-
-        return self
+        # 3. 处理容器关系
+        for src in sources:
+            if src in self.conntainer:
+                # 从容器中移除目标节点
+                container_nodes = self.conntainer[src]
+                for tgt in targets:
+                    if tgt in container_nodes:
+                        container_nodes.remove(tgt)
+                # 如果容器为空，删除容器
+                if not container_nodes:
+                    del self.conntainer[src]
 
     # endregion
 
@@ -516,6 +549,9 @@ if __name__ == "__main__":
     c4 = Connection()
     c5 = Connection()
     flow = Connection()
+    c1 >> c2
+    c1 >> c2
+    print(c1.connections, c1.conntainer, c1.hidden_connections)
     # print((c1 >> c2 >> c3).chains)
     # print((c1 << [c2, c3] << c4
     # print((c1 << flow[c2, c3 >> c5] << c4

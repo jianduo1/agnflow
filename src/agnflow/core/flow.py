@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Dict, Self
 
 from agnflow.core.connection import Connection
 from agnflow.core.node import Node
@@ -9,6 +9,122 @@ class Flow(Connection):
 
     def __init__(self, name: str = None):
         super().__init__(name=name)
+
+    def __getitem__(self, node: "Connection | tuple | list | slice") -> Self:
+        """重载运算符 []
+        
+        功能：
+        - 补全内部连接connections
+        - 补全外部隐式连接hidden_connections
+        - 添加节点到容器conntainer
+
+        连接类型：
+        - flow[a] 单节点
+        - flow[a >> b] 链路
+        - flow[a, b] 多节点
+        - flow[a:(b, c):(d, e)] 切片表达式，相当于 a->(b,c)  (b,c)->(d,e)
+        - flow[(a, b, c):(a, b, c)] 全连接，相当于 a<->b<->c
+        - flow[flow[a, b], flow[c, d]] 嵌套
+        """
+
+        def to_conn_list(obj) -> list[Connection]:
+            """将输入统一转为节点列表"""
+            if isinstance(obj, Connection):
+                return [obj]
+            if isinstance(obj, (tuple, list)):
+                return [*obj]
+            return []
+
+        conntainer: list[Connection] = self.conntainer.setdefault(self, [])
+        # 1.补全内部连接connections
+        # 1.1 处理切片表达式 flow[a:(b,c)]
+        if isinstance(node, slice):
+            # 支持三段式切片：start:stop:step
+            starts: list[Connection] = to_conn_list(node.start)
+            stops: list[Connection] = to_conn_list(node.stop)
+            steps: list[Connection] = to_conn_list(node.step)
+            # 构建工作流内部的显式连接 start->stop, stop->step
+            for srcs, tgts in ((starts, stops), (stops, steps)):
+                for src in srcs:
+                    for tgt in tgts:
+                        # 忽略自连接和空节点
+                        if src is tgt or src is None or tgt is None:
+                            continue
+                        # 加入容器
+                        if src not in conntainer:
+                            conntainer.append(src)
+                        if tgt not in conntainer:
+                            conntainer.append(tgt)
+                        # 建立连接
+                        src_map: Dict[str, Connection] = self.connections.setdefault(src, {})
+                        src_map[tgt.name] = tgt
+        # 1.2 处理连接类型 flow[a>>b>>a]（a-b-a需要去重）
+        elif isinstance(node, Connection):
+            # 添加到容器，可以用于绘制mermaid流程图，{chain:[a,b]}
+            for node in node.chains:
+                if node not in conntainer:
+                    conntainer.append(node)
+        # 1.3 处理连接数组类型 flow[a,b,c]
+        elif isinstance(node, (tuple, list)):
+            for node in node:
+                self.__getitem__(node)
+
+        # 2.统一把所有节点都加到 conntainer[self]
+        nodes = to_conn_list(node)  # 你可以写一个辅助函数，递归提取所有节点
+        for node in nodes:
+            if node not in conntainer:
+                conntainer.append(node)
+
+        return self
+
+    def __iadd__(self, node: "Connection | tuple | list") -> Self:
+        """动态添加节点，调用__getitem__建立连接，并补全外部连接和hidden_connections"""
+        # 1. 补全内部连接connections，和添加当前节点到conntainer
+        self.__getitem__(node)
+        nodes = node if isinstance(node, (list, tuple)) else [node]
+        # 2. 补全外部隐式连接hidden_connections
+        # 2.1 获取self与外部的连接
+        external_in = []
+        external_out = []
+        for src, tgt_map in self.connections.items():
+            for tgt in tgt_map.values():
+                if src is self:
+                    external_out.append(tgt)
+                if tgt is self:
+                    external_in.append(src)
+        # 2.2 补全外部隐式连接
+        for n in nodes:
+            for ext in external_in:
+                self.hidden_connections.setdefault(ext, {})[n.name] = n
+            for ext in external_out:
+                self.hidden_connections.setdefault(n, {})[ext.name] = ext
+
+        return self
+
+    def __isub__(self, node: "Connection | tuple | list") -> Self:
+        """动态删除节点，移除conntainer和相关连接，并清理外部连接。节点不在容器内时抛出异常。"""
+        conntainer = self.conntainer.setdefault(self, [])
+        nodes = node if isinstance(node, (list, tuple)) else [node]
+        for n in nodes:
+            if n in conntainer:
+                # 从conntainer中清理
+                conntainer.remove(n)
+                # 从connections和hidden_connections中清理
+                for conn_map in [self.connections, self.hidden_connections]:
+                    # 使用字典副本进行遍历，避免运行时修改错误
+                    for src, tgt_map in list(conn_map.items()):
+                        # n为src
+                        if src is n:
+                            conn_map.pop(src)
+                            break
+                        # n为tgt
+                        for tgt_name, tgt in list(tgt_map.items()):
+                            if tgt is n:
+                                conn_map[src].pop(tgt_name)
+                                break
+            else:
+                raise ValueError(f"节点 {n} 不在容器 {self.name} 中，无法删除")
+        return self
 
     # region 执行流程
 
@@ -136,7 +252,6 @@ class Flow(Connection):
 
 
 if __name__ == "__main__":
-    from agnflow.core.node import Node
     from agnflow.utils.code import get_code_line
 
     # n1 = Node()
@@ -163,17 +278,18 @@ if __name__ == "__main__":
         else:
             return "exit", {"review_result": result, "approved": False}
 
-    n1 = Node("review", exec=review_node)
-    n2 = Node("next", exec=lambda state: print("流程继续", state))
-    n1 >> n2
-    flow = Flow(n1, name="hitl_demo")
-    flow.run({"msg": "hello"})
+    # n1 = Node("review", exec=review_node)
+    # n2 = Node("next", exec=lambda state: print("流程继续", state))
+    # n3 = Node("exit", exec=lambda state: "exit")
+    # n1 >> n2
+    # flow = Flow(n1, name="hitl_demo")
+    # flow.run({"msg": "hello"})
 
 
 class Supervisor(Flow):
-    """监督者智能体"""
+    """监督者智能体（监督者与被监督者互连）"""
 
-    def __getitem__(self, key: tuple[Node]):
+    def __getitem__(self, node: list[Node]) -> Self:
         """重载运算符 self[key]，设置子工作流
 
         Supervisor[n1, n2, n3] 第一个参数为监督者，其余为被监督者
@@ -183,19 +299,19 @@ class Supervisor(Flow):
         n1 <-> n2
         n1 <-> n3
         """
-        if len(key) == 1:
-            raise ValueError("Supervisor只能接受两个以上参数")
-        supervisor, *supervisees = key
-
-        # 先用 slice 方式建立连接关系
-        super().__getitem__(slice(supervisor, supervisees, supervisor))
-
-        # 把所有节点都添加到 conntainer[self]
+        # 统一转为 list
+        if not isinstance(node, (list, tuple)):
+            node = [node]
         conntainer = self.conntainer.setdefault(self, [])
-        for node in key:
-            if node not in conntainer:
-                conntainer.append(node)
-
+        # 预判加完后的总数
+        new_total = len(conntainer) + len([n for n in node if n not in conntainer])
+        if new_total < 2:
+            raise ValueError("Supervisor只能接受两个以上节点")
+        for n in node:
+            if n not in conntainer:
+                conntainer.append(n)
+        supervisor, *supervisees = conntainer
+        super().__getitem__(slice(supervisor, supervisees, supervisor))
         return self
 
 
@@ -213,9 +329,9 @@ if __name__ == "__main__":
 
 
 class Swarm(Flow):
-    """蜂群智能体"""
+    """蜂群智能体（蜂群节点全互连）"""
 
-    def __getitem__(self, key: tuple[Node]):
+    def __getitem__(self, node: list[Node]) -> Self:
         """重载运算符 self[key]，获取子工作流
 
         Swarm[n1, n2, n3]
@@ -224,23 +340,28 @@ class Swarm(Flow):
         相当于
         n1 <-> n2 <-> n3 <-> n1
         """
-        if len(key) == 1:
-            raise ValueError("Swarm只能接受两个以上参数")
-
-        # 先用 slice 方式建立连接关系
-        super().__getitem__(slice(key, key))
-
-        # 把所有节点都添加到 conntainer[self]
+        # 统一转为 list
+        if not isinstance(node, (list, tuple)):
+            node = [node]
         conntainer = self.conntainer.setdefault(self, [])
-        for node in key:
-            if node not in conntainer:
-                conntainer.append(node)
-
+        # 预判加完后的总数
+        new_total = len(conntainer) + len([n for n in node if n not in conntainer])
+        if new_total < 2:
+            raise ValueError("Swarm只能接受两个以上节点")
+        for n in node:
+            if n not in conntainer:
+                conntainer.append(n)
+        # 全互连，显式连接
+        super().__getitem__(slice(conntainer, conntainer))
+        # 补全隐式连接
+        for i in conntainer:
+            for j in conntainer:
+                if i is not j:
+                    self.build_connections(i, j)
         return self
 
 
 if __name__ == "__main__":
-    from .node import Node
     from pprint import pprint
 
     n1 = Node(exec=lambda state: "n2")
@@ -252,7 +373,7 @@ if __name__ == "__main__":
     s3 = Swarm()
 
     # fmt: off
-    s1[n1, n2, n3,n4];title=get_code_line()[0]
+    n1>>s1[ n2, n3];title=get_code_line()[0]
     # s1[n1, n2, n3,n4];title=get_code_line()[0]
     # n1 >> s1[n2, n3] >> n4;title=get_code_line()
     # s1[n1, n2] >> s2[n3, n4];title = get_code_line()
@@ -260,17 +381,24 @@ if __name__ == "__main__":
 
     # 绘制流程图
     # print(s1.render_dot(saved_file="assets/swarm_dot.png"))
-    # print(s1.render_mermaid(saved_file="assets/swarm_mermaid.png", title=title))
+    for i in s1.render_mermaid(saved_file="assets/swarm_mermaid.png", title=title)[1:]:
+        print(i)
+    pprint(s1.hidden_connections, indent=2, width=30)
+    s1 += n4
+    # s1[n4]
+    for i in s1.render_mermaid(saved_file="assets/swarm_mermaid_2.png", title=title)[1:]:
+        print(i)
+    pprint(s1.hidden_connections, indent=2, width=30)
+    s1 -= n2
+    # s1[~n2]
+    for i in s1.render_mermaid(saved_file="assets/swarm_mermaid_3.png", title=title)[1:]:
+        print(i)
+    pprint(s1.hidden_connections, indent=2, width=30)
 
     # 连接关系
-    # # 蜂群容器
     # pprint(s1.conntainer, indent=2, width=30)
-    # # 蜂群隐式连接
     # pprint(s1.hidden_connections, indent=2, width=30)
-    # # 蜂群显式连接
     # pprint(s1.connections, indent=2, width=30)
-    # # 蜂群所有连接
-    # pprint(s1.all_connections, indent=2, width=30)
 
     # 执行流程
     # s1.run({}, max_steps=10, entry_action="n2")

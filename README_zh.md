@@ -1,495 +1,171 @@
 <div align="center">
-  <h1>agnflow</h1>
-  <strong>一个简洁的 Python 智能体工作流引擎</strong>
+  <h1>🚀 agnflow</h1>
+  <strong>高效 Python 智能体工作流引擎</strong>
   <br>
-  <h3>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
-    <a href="https://jianduo1.github.io/agnflow/"><img src="https://img.shields.io/badge/docs-latest-blue.svg" alt="Docs"></a>
-    <a href="https://pypi.org/project/agnflow/"><img src="https://img.shields.io/badge/pypi-v0.1.4-blue.svg" alt="PyPI"></a>
-    <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="Python Version"></a>
-  </h3>
+  <em>支持同步/异步节点、分支循环、可视化流程图 | 快速搭建 Agent 任务流</em>
+  <br><br>
+  
+  [![Star](https://img.shields.io/github/stars/jianduo1/agnflow?style=social)](https://github.com/jianduo1/agnflow)  
+  [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) 
+  [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://jianduo1.github.io/agnflow/)  
+  [![PyPI](https://img.shields.io/badge/pypi-v0.1.4-blue.svg)](https://pypi.org/project/agnflow/)  
+  [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 </div>
 
-中文 | [English](README.md)
+---
 
-**agnflow** 追求极简、易用、可扩展，适合快速原型、定制化 LLM 工作流、Agent 任务流等场景。
+## 🎯 核心亮点
 
-## 🎯 核心功能展示
+### ⚡ **极简语法 - 5行代码构建**
+```python
+from agnflow import Node, Flow
+n1 = Node("hello", exec=lambda s: {"msg": "world"})
+n2 = Node("world", exec=print)
+state = {"data": "hello"}
+Flow(n1 >> n2).run(state)  # 输出: {'msg': 'world'}
+```
 
-| 智能体类型 | 代码示例 | 流程图 |
-|:----------:|:--------|:------:|
-| **复杂节点连接** | `n1 >> [n2 >> n3, n3 >> n4] >> n5` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="节点连接流程图"> |
-| **复杂工作流连接** | `f1[n1 >> n2 >> f2[n3]] >> f3[n4]` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/flow_mermaid.png" height="150" alt="工作流连接流程图"> |
-| **监督者智能体**<br>*首节点与其余节点双向连接* | `s1[n1, n2, n3] >> n4` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="监督者智能体流程图"> |
-| **基础蜂群连接**<br>*任意节点进行双向连接* | `s1[n1, n2, n3, n4]` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid1.png" height="150" alt="基础蜂群连接流程图"> |
-| **节点与蜂群连接** | `n1 >> s1[n2, n3] >> n4` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid2.png" height="150" alt="节点与蜂群连接流程图"> |
-| **多个蜂群连接** | `s1[n1, n2] >> s2[n3, n4]` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="多个蜂群连接流程图"> |
+### 🎨 **自动可视化流程图**
+```python
+flow.render_mermaid(saved_file="flow.png")  # 直接生成图片
+```
 
-## 1. TODO（未来扩展方向）
+### 🔄 **运行期动态节点管理** ⭐️ **新功能**
+```python
+# 运行期增删节点
+flow += new_node
+flow -= old_node
 
-- [ ] llm（支持stream，多模态，异步，structured output）
-- [ ] memory
-- [ ] rag
-- [ ] mcp tool
-- [ ] ReAct (reasoning + action)
-- [ ] TAO (thought + action + observation)
-- [ ] ToT (Tree of Thought)
-- [ ] CoT (Chain of Thought)
-- [X] hitl (human in the loop, CLI & API)
-- [X] 👏🏻 supervisor swarm
-- [ ] multi-agent 分布式通信：socket、zeromq、redis pub/sub ...
- 
-> 以上为未来可扩展的智能体/推理/工具集成方向，欢迎贡献和建议。
+# 对称的连接/断开语法
+a >> b >> c    # 建立连接
+a - b - c      # 对称断开
+```
 
-## 2. 特性
-- 节点式工作流，支持分支、循环、子流程
-- 支持同步与异步执行
-- 支持流程图（dot/mermaid）渲染
-- 代码简洁，易于扩展
+### 🚀 **高级流程控制**
+- **同步/异步混合**: `Node(aexec=async_func)`
+- **分支/循环**: `n1 >> [n2, n3] >> n4`
+- **蜂群智能体**: `s1[n1, n2, n3] >> n4`
+- **人工审核**: CLI/API 介入
 
-## 3. 安装
+## 📦 快速开始
 
-### 3.1 从 PyPI 安装（推荐）
-
+### 安装
 ```bash
-# 使用 pip 安装
 pip install agnflow
-
-# 使用 rye 安装
-rye add agnflow
-
-# 使用 poetry 安装
-poetry add agnflow
-
-# 安装特定版本
-pip install agnflow==0.1.4
-
-# 安装最新开发版本
-pip install --upgrade agnflow
 ```
 
-### 3.2 从源码安装
+### 基础用法
+```python
+from agnflow import Node, Flow
+import asyncio
 
-推荐使用 [rye](https://rye-up.com/) 进行依赖和虚拟环境管理：
+# 定义节点
+greet = Node("Greet", exec=lambda state: {"message": "Hello!"})
+async def async_respond(state):
+    await asyncio.sleep(1)
+    print(state["message"])
+respond = Node("Respond", aexec=async_respond)
 
-```bash
-# 克隆仓库
-git clone https://github.com/jianduo1/agnflow.git
-cd agnflow
-
-# 安装依赖
-rye sync
-
-# 开发模式安装
-rye sync --dev
+# 构建并运行工作流
+flow = Flow(greet >> respond)
+asyncio.run(flow.arun({"data": "hello"}))
 ```
 
-### 3.3 流程图渲染工具（可选）
+## 🎨 功能展示
 
-**注意：生成图片需要安装额外的工具**
+| 功能 | 代码示例 | 可视化 |
+|:----:|:---------|:------:|
+| **复杂连接** | `n1 >> [n2 >> n3, n3 >> n4] >> n5` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="120" alt="复杂连接"> |
+| **蜂群智能体** | `s1[n1, n2, n3] >> n4` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="120" alt="蜂群智能体"> |
+| **运行期管理** | `flow += new_node`<br>`flow -= old_node` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="120" alt="运行期管理"> |
 
-**Dot格式图片生成（推荐）：**
+## 📚 文档
+
+- **[📖 完整文档](https://jianduo1.github.io/agnflow/)** - 完整指南和API参考
+- **[🚀 快速开始](https://jianduo1.github.io/agnflow/getting-started/)** - 几分钟内上手
+- **[🔧 API参考](https://jianduo1.github.io/agnflow/api/)** - 详细API文档
+- **[💡 示例代码](https://github.com/jianduo1/agnflow/tree/main/examples)** - 即用示例
+
+## 🎯 为什么选择 agnflow？
+
+- **⚡ 轻量**: 核心代码仅数百行
+- **🎨 可视化**: 自动生成精美流程图
+- **🔄 动态**: 运行期增删节点
+- **🤖 智能体友好**: 原生LLM集成支持
+- **🚀 快速**: 最小开销，最大性能
+
+## 🛠️ 安装与依赖
+
+### 基础安装
 ```bash
-# macOS
-brew install graphviz
-
-# Ubuntu/Debian
-sudo apt-get install graphviz
-
-# CentOS/RHEL
-sudo yum install graphviz
-
-# Windows
-# 下载并安装：https://graphviz.org/download/
+pip install agnflow
 ```
 
-**Mermaid格式图片生成：**
+### 可选依赖（流程图渲染）
 ```bash
-# 安装 mermaid-cli
+# Dot 格式（推荐）
+brew install graphviz  # macOS
+sudo apt-get install graphviz  # Linux
+
+# Mermaid 格式
 npm install -g @mermaid-js/mermaid-cli
-
-# 安装 puppeteer 浏览器（用于渲染）
-npx puppeteer browsers install chrome-headless-shell
 ```
 
-### 3.4 开发环境
-
-使用 rye 管理开发环境：
-
-```bash
-# 安装依赖
-rye sync
-
-# 运行测试
-rye run test
-
-# 代码格式化
-rye run format
-
-# 代码检查
-rye run lint
-
-# 运行示例
-rye run example
-```
-
-### 3.5 发布到 PyPI
-
-```bash
-# 清理之前的构建
-rye run clean
-
-# 构建包
-rye run build
-
-# 上传到测试 PyPI（推荐先测试）
-rye run upload-test
-
-# 上传到正式 PyPI
-rye run upload
-```
-
-**注意：** 首次上传到 PyPI 需要：
-1. 在 [PyPI](https://pypi.org) 注册账号
-2. 在 [TestPyPI](https://test.pypi.org) 注册账号
-3. 配置 `~/.pypirc` 文件或使用环境变量
-
-## 4. 快速开始
-
-### 4.1 定义节点
-```python
-from agnflow import Node, Flow
-
-def hello_exec(state):
-    print("hello", state)
-    return {"msg": "world"}
-
-def world_exec(state):
-    print("world", state)
-
-n1 = Node("hello", exec=hello_exec)
-n2 = Node("world", exec=world_exec)
-n1 >> n2
-```
-
-### 4.2 构建并运行工作流
-```python
-flow = Flow(n1, name="demo")
-flow.run({"msg": "hi"})
-```
-
-### 4.3 异步执行
-```python
-import asyncio
-async def ahello(state):
-    print("async hello", state)
-    return {"msg": "async world"}
-n1 = Node("hello", aexec=ahello)
-flow = Flow(n1)
-asyncio.run(flow.arun({"msg": "hi"}))
-```
-
-### 4.4 绘制流程图
-```python
-print(flow.render_dot())      # 输出dot格式
-print(flow.render_mermaid())  # 输出mermaid格式
-
-# 保存为图片文件
-flow.render_dot(saved_file="./flow.png")      # 保存dot格式图片
-flow.render_mermaid(saved_file="./flow.png")  # 保存mermaid格式图片
-```
-
-### 4.5 人工审核（HITL）示例
-
-#### CLI 模式
-```python
-from agnflow.agent.hitl.cli import human_in_the_loop
-result, approved = human_in_the_loop("请审核此数据", input_data={"foo": 123})
-print(result, approved)
-```
-
-#### API 模式（FastAPI）
-1. 启动 FastAPI 服务：
-```python
-from agnflow.agent.hitl.api import get_hitl_router
-from fastapi import FastAPI
-app = FastAPI()
-app.include_router(get_hitl_router())
-```
-2. 使用 curl 交互：
-```bash
-# 创建审核任务
-response=$(curl -s -X POST "http://127.0.0.1:8000/hitl/tasks/" -H "Content-Type: application/json" -d '{"prompt": "请审核", "input_data": {"foo": 123}}')
-echo $response | jq
-task_id=$(jq -r '.task_id' <<< "$response")
-# 查询任务
-curl -s "http://127.0.0.1:8000/hitl/tasks/$task_id" | jq
-# 提交审核
-curl -s -X POST "http://127.0.0.1:8000/hitl/tasks/$task_id/submit" -H "Content-Type: application/json" -d '{"approve": true, "result": "同意"}' | jq
-```
-
-## 5. 节点函数详解
-
-### 5.1 函数入参方式
-
-agnflow 支持多种函数入参方式，会根据函数签名自动从状态中获取参数：
-
-#### 方式 1: 接收整个状态
-```python
-def my_node(state):
-    """接收整个状态字典"""
-    print(f"收到状态: {state}")
-    return {"result": "processed"}
-
-n1 = Node("my_node", exec=my_node)
-```
-
-#### 方式 2: 按参数名自动注入
-```python
-def my_node(user_id, message, data):
-    """根据参数名从状态中自动获取值"""
-    print(f"用户ID: {user_id}")
-    print(f"消息: {message}")
-    print(f"数据: {data}")
-    return {"processed": True}
-
-# 调用时传入包含这些字段的状态
-flow.run({
-    "user_id": "123",
-    "message": "hello",
-    "data": {"key": "value"}
-})
-```
-
-#### 方式 3: 混合方式
-```python
-def my_node(user_id, state):
-    """混合方式：部分参数 + 整个状态"""
-    print(f"用户ID: {user_id}")
-    print(f"完整状态: {state}")
-    return {"user_processed": True}
-```
-
-### 5.2 函数返回值方式
-
-节点函数支持多种返回值格式：
-
-#### 方式 1: 只返回新状态
-```python
-def my_node(state):
-    """只更新状态，使用默认action"""
-    return {"new_data": "value", "timestamp": time.time()}
-```
-
-#### 方式 2: 返回action和新状态
-```python
-def my_node(state):
-    """返回action和更新后的状态"""
-    if state.get("condition"):
-        return "success", {"result": "success"}
-    else:
-        return "error", {"result": "error"}
-```
-
-#### 方式 3: 只返回action
-```python
-def my_node(state):
-    """只返回action，不更新状态"""
-    if state.get("condition"):
-        return "success"
-    else:
-        return "error"
-```
-
-#### 方式 4: 返回None（结束工作流）
-```python
-def my_node(state):
-    """返回None结束工作流"""
-    if state.get("should_stop"):
-        return None
-    return "continue", {"step": "completed"}
-```
-
-### 5.3 异步节点函数
-
-异步节点函数使用 `aexec` 参数，支持所有同步函数的特性：
-
-```python
-import asyncio
-
-async def async_node(state):
-    """异步节点函数"""
-    await asyncio.sleep(0.1)  # 模拟异步操作
-    return {"async_result": "done"}
-
-async def async_node_with_action(user_id, state):
-    """异步节点函数 - 混合参数 + action"""
-    await asyncio.sleep(0.1)
-    return "next", {"user_id": user_id, "processed": True}
-
-# 创建异步节点
-n1 = Node("async_node", aexec=async_node)
-n2 = Node("async_node_with_action", aexec=async_node_with_action)
-
-# 异步执行
-asyncio.run(flow.arun({"user_id": "123"}))
-```
-
-### 5.4 节点类继承方式
-
-除了函数方式，还可以通过继承 `Node` 类来创建节点：
-
-```python
-class MyNode(Node):
-    def exec(self, state):
-        """同步执行方法"""
-        print(f"执行节点: {self.name}")
-        return {"class_result": "success"}
-    
-    async def aexec(self, state):
-        """异步执行方法"""
-        print(f"异步执行节点: {self.name}")
-        return {"async_class_result": "success"}
-
-# 使用类节点
-n1 = MyNode("my_class_node")
-```
-
-### 5.5 错误处理和重试
-
-节点支持错误处理和重试机制：
-
-```python
-def risky_node(state):
-    """可能出错的节点"""
-    if random.random() < 0.5:
-        raise Exception("随机错误")
-    return {"success": True}
-
-# 创建支持重试的节点
-n1 = Node("risky_node", exec=risky_node, max_retries=3, wait=1)
-
-# 自定义错误处理
-class SafeNode(Node):
-    def exec_fallback(self, state, exc):
-        """自定义错误处理"""
-        return "error", {"error": str(exc), "recovered": True}
-    
-    async def aexec_fallback(self, state, exc):
-        """自定义异步错误处理"""
-        return "error", {"error": str(exc), "recovered": True}
-```
-
-### 5.6 完整示例
-
-```python
-from agnflow import Node, Flow
-import time
-
-# 定义不同类型的节点函数
-def start_node(user_id, message):
-    """接收特定参数"""
-    return "n2", {"user_id": user_id, "message": message}
-
-def process_node(state):
-    """接收整个状态"""
-    processed = f"处理: {state['message']}"
-    return "n3", {"processed": processed, "timestamp": time.time()}
-
-def complete_node(result, state):
-    """混合参数"""
-    print(f"结果: {result}")
-    print(f"状态: {state}")
-    return {"final_result": "success"}
-
-# 创建节点
-n1 = Node("start", exec=start_node)
-n2 = Node("process", exec=process_node)
-n3 = Node("complete", exec=complete_node)
-
-# 连接节点
-n1 >> n2 >> n3
-
-# 创建工作流
-flow = Flow(n1, name="example_flow")
-
-# 运行工作流
-result = flow.run({
-    "user_id": "123",
-    "message": "Hello agnflow!"
-})
-
-print(f"工作流结果: {result}")
-```
-
-## 6. 节点连接语法
-
-agnflow 提供了多种灵活的节点连接方式：
-
-### 6.1 线性连接
-```python
-# 方法1：正向连接
-a >> b >> c
-
-# 方法2：反向连接  
-c << b << a
-```
-
-### 6.2 分支连接
-```python
-# 根据节点返回值进行分支
-a >> [b, c]
-```
-
-### 6.3 子流程连接
-```python
-# 连接子流程
-d1 >> flow >> d2
-```
-
-## 7. 复杂工作流示例
-
-运行示例代码`src/agnflow/example.py`后，会生成以下流程图：
-
-工作流定义：
-```py
-a >> [b >> flow, c >> a]
-d1 >> flow >> d2
-```
-
-### 7.1 Dot 格式流程图
-![Dot Flow](assets/flow_dot.png)
-
-### 7.2 Mermaid 格式流程图  
-![Mermaid Flow](assets/flow_mermaid.png)
-
-这些流程图展示了：
-- 节点之间的连接关系
-- 分支和循环结构
-- 子流程的嵌套关系
-- 工作流的整体执行路径
-
-## 8. 参考框架
-
-agnflow 参考和对标了以下主流智能体/工作流框架：
-
-![LangGraph](https://img.shields.io/badge/LangGraph-green.svg) ![LlamaIndex](https://img.shields.io/badge/LlamaIndex-green.svg) ![AutoGen](https://img.shields.io/badge/AutoGen-green.svg) ![Haystack](https://img.shields.io/badge/Haystack-green.svg) ![CrewAI](https://img.shields.io/badge/CrewAI-green.svg) ![FastGPT](https://img.shields.io/badge/FastGPT-green.svg) ![PocketFlow](https://img.shields.io/badge/PocketFlow-green.svg)
-
-## 9. 项目状态
-
-### 📦 发布状态
-- **PyPI**: ✅ [v0.1.4](https://pypi.org/project/agnflow/0.1.4/) 已发布
-- **GitHub**: ✅ [开源仓库](https://github.com/jianduo1/agnflow)
-- **文档**: ✅ [API 文档](docs/API.md) 完整
-- **测试**: ✅ 功能测试通过
-
-### 🔄 版本信息
-- **当前版本**: 0.1.4
-- **Python 支持**: 3.8+
-- **许可证**: MIT
-- **状态**: Beta
-
-## 10. 许可证
-MIT
-
-
+## 🤝 贡献
+
+1. **Star & Fork** 本仓库
+2. 提交 [Issue](https://github.com/jianduo1/agnflow/issues) 反馈问题
+3. 提交 [PR](https://github.com/jianduo1/agnflow/pulls) 改进功能
+
+**维护者**: [@jianduo1](https://github.com/jianduo1) | **许可证**: MIT
+
+
+## 🔮 未来规划
+
+### 🧠 **第一阶段：高级LLM集成 (v0.2.x)**
+- **🔄 流式支持**: 实时LLM响应流式处理
+- **🖼️ 多模态能力**: 文本、图像、音频、视频处理
+- **⚡ 异步LLM操作**: 非阻塞LLM交互
+- **📋 结构化输出**: JSON、XML和自定义模式输出
+- **🔗 MCP工具集成**: 原生模型上下文协议支持
+- **💾 记忆系统**: 短期和长期记忆管理
+- **🔍 RAG集成**: 检索增强生成工作流
+
+### 🤔 **第二阶段：推理框架 (v0.3.x)**
+- **🔗 ReAct框架**: 推理+行动模式实现
+- **🔄 TAO框架**: 思考+行动+观察循环
+- **🌳 ToT框架**: 思维树推理
+- **⛓️ CoT框架**: 思维链推理
+- **🎯 多智能体推理**: 跨智能体的协作推理
+- **📊 推理分析**: 性能指标和优化
+<!-- 
+### 🌐 **第三阶段：企业级与云原生 (v0.4.x)**
+- **☁️ 云部署**: 一键部署到主流平台
+- **🔄 分布式执行**: 多机工作流编排
+- **📈 自动扩缩容**: 动态资源分配
+- **🔐 企业安全**: SSO、LDAP和合规功能
+- **📊 高级监控**: 实时工作流分析 
+-->
+
+### 🎨 **第四阶段：高级UI与生态 (v1.0.x)**
+- **🖥️ 可视化工作流编辑器**: 交互式Web设计器
+- **🔌 插件生态**: 可扩展的集成架构
+- **📱 移动端支持**: 移动友好的工作流管理
+- **🌍 多语言**: 国际化支持
+- **🤝 社区中心**: 模板、示例和最佳实践
+
+### ✅ **已完成功能** 👏🏻
+- **👥 人工介入循环 (HITL)**: CLI/API干预能力
+- **🐝 监督者蜂群**: 多智能体协调和管理
+- **🔄 运行期节点管理**: 动态增删节点
+- **🎨 可视化流程图**: 自动生成工作流图表
+- **⚡ 同步/异步混合**: 混合执行模式
+- **🌿 分支与循环**: 复杂工作流模式 
+
+---
+
+<div align="center">
+  <strong>如果这个项目对你有帮助，请给它一个 ⭐️ Star！</strong>
+  <br>
+  <em>你的支持是我持续改进的动力 💪</em>
+</div>

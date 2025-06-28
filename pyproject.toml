@@ -49,6 +49,12 @@ dev-dependencies = [
     "flake8>=6.0.0",
     "build>=1.2.2.post1",
     "twine>=6.1.0",
+    "sentence-transformers>=2.2.0",
+    "torch>=2.0.0",
+    "langchain-qwq>=0.2.0",
+    "mkdocs-material>=9.6.14",
+    "mkdocs-git-revision-date-localized-plugin>=1.4.7",
+    "mkdocs-minify-plugin>=0.8.0",
 ]
 
 [tool.rye.scripts]
