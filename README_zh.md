@@ -8,6 +8,14 @@
   [![Star](https://img.shields.io/github/stars/jianduo1/agnflow?style=social)](https://github.com/jianduo1/agnflow) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://jianduo1.github.io/agnflow/) [![PyPI](https://img.shields.io/badge/pypi-v0.1.4-blue.svg)](https://pypi.org/project/agnflow/) [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 </div>
 
+<div align="center">
+  <br>
+  <img src="assets/rapid-dev.jpeg" alt="agnflow 快速开发工作流" width="600" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  <br>
+  <em>🎨 agnflow 可视化工作流设计 - 几分钟内构建复杂的智能体流程</em>
+  <br><br>
+</div>
+
 ---
 
 ## 🎯 核心亮点
