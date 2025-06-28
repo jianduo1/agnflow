@@ -16,7 +16,8 @@ jobs:
     concurrency:
       group: "pages"
       cancel-in-progress: false
-    
+    environment:
+      name: github-pages
     steps:
     - name: Checkout
       uses: actions/checkout@v4
