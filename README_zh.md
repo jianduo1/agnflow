@@ -1,6 +1,6 @@
 <div align="center">
-  <h1>🚀 agnflow</h1>
-  <strong>高效 Python 智能体工作流引擎</strong>
+  <h1>🚀 AgnFlow</h1>
+  <strong>高效轻量的 Python 智能体工作流引擎</strong>
   <br>
   <em>支持同步/异步节点、分支循环、可视化流程图 | 快速搭建 Agent 任务流</em>
   <br><br>
@@ -12,9 +12,9 @@
 <div align="center">
   <br>
   <div style="display: flex; justify-content: center; flex-wrap: wrap;">
-    <img src="assets/rapid-dev/code-zh.png" alt="agnflow 代码示例" height="300" style="border-radius: 8px 0 0 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-    <img src="assets/rapid-dev/log-zh.png" alt="agnflow 日志输出" height="300" style="border-radius: 0; box-shadow: none; margin-left: 1px;">
-    <img src="assets/rapid-dev/mermaid.png" alt="agnflow 流程图" height="300" style="border-radius: 0 8px 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 1px;">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/rapid-dev/code-zh.png" alt="agnflow 代码示例" height="300" style="border-radius: 8px 0 0 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/rapid-dev/log-zh.png" alt="agnflow 日志输出" height="300" style="border-radius: 0; box-shadow: none; margin-left: 1px;">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/rapid-dev/mermaid.png" alt="agnflow 流程图" height="300" style="border-radius: 0 8px 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 1px;">
   </div>
   <br>
   <em>💻 代码 → 📊 日志 → 🎨 流程图 - 快速开发复杂的智能体工作流可视化</em>

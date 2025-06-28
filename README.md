@@ -1,6 +1,6 @@
 <div align="center">
-  <h1>🚀 agnflow</h1>
-  <strong>Efficient Python Agent Workflow Engine</strong>
+  <h1>🚀 AgnFlow</h1>
+  <strong>Efficient lightweight Python Agent Workflow Engine</strong>
   <br>
   <em>Support Sync/Async Nodes, Branching Loops, Visual Flowcharts | Build Agent Task Flows Fast</em>
   <br><br>
@@ -12,9 +12,9 @@
 <div align="center">
   <br>
   <div style="display: flex; justify-content: center; flex-wrap: wrap;">
-    <img src="assets/rapid-dev/code.png" alt="agnflow Code Example" height="300" style="border-radius: 8px 0 0 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-    <img src="assets/rapid-dev/log.png" alt="agnflow Log Output" height="300" style="border-radius: 0; box-shadow: none; margin-left: 1px;">
-    <img src="assets/rapid-dev/mermaid.png" alt="agnflow Mermaid Flowchart" height="300" style="border-radius: 0 8px 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 1px;">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/rapid-dev/code.png" alt="agnflow Code Example" height="300" style="border-radius: 8px 0 0 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/rapid-dev/log.png" alt="agnflow Log Output" height="300" style="border-radius: 0; box-shadow: none; margin-left: 1px;">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/rapid-dev/mermaid.png" alt="agnflow Mermaid Flowchart" height="300" style="border-radius: 0 8px 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 1px;">
   </div>
   <br>
   <em>💻 Code → 📊 Log → 🎨 Flowchart - Complete development agent workflow visualization in minutes</em>
