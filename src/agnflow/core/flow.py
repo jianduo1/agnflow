@@ -3,6 +3,9 @@ from typing import Any, Dict, Self
 from agnflow.core.connection import Connection
 from agnflow.core.node import Node
 
+log_zh = print
+log = lambda *x: ...
+
 
 class Flow(Connection):
     """工作流容器"""
@@ -12,7 +15,7 @@ class Flow(Connection):
 
     def __getitem__(self, node: "Connection | tuple | list | slice") -> Self:
         """重载运算符 []
-        
+
         功能：
         - 补全内部连接connections
         - 补全外部隐式连接hidden_connections
@@ -155,7 +158,8 @@ class Flow(Connection):
         step = 0
 
         while current_node and step < remaining_steps:
-            print(f"\n🔵 执行节点: {current_node} (剩余步数: {remaining_steps - step})")
+            log(f"\n🔵 Executing node: {current_node} (Remaining steps: {remaining_steps - step})")
+            log_zh(f"\n🔵 执行节点: {current_node} (剩余步数: {remaining_steps - step})")
 
             # ⭐️ 执行当前节点
             try:
@@ -163,7 +167,9 @@ class Flow(Connection):
                 result = await current_node.execute_workflow(
                     state, remaining_steps=remaining_steps - step, is_async=is_async
                 )
-                print(f"🔍 节点 {current_node} 执行结果: {result}")
+
+                log(f"🔍 Node {current_node} execution result: {result}")
+                log_zh(f"🔍 节点 {current_node} 执行结果: {result}")
 
             except Exception as e:
                 print(f"🚨 节点 {current_node} 执行出错: {e}")
@@ -214,7 +220,10 @@ class Flow(Connection):
         # 1. 优先使用 self.connections[self][entry_action]
         if entry_action and self in self.conntainer and entry_action in [i.name for i in self.conntainer[self]]:
             start_node = next(i for i in self.conntainer[self] if i.name == entry_action)
-            print(
+            log(
+                f"🟢 {self.name}{self.conntainer[self]} selects entry node: {start_node} based on entry_action: '{entry_action}'"
+            )
+            log_zh(
                 f"🟢 {self.name}{self.conntainer[self]} 根据 entry_action: '{entry_action}' 选择入口节点: {start_node}"
             )
             return start_node
@@ -222,11 +231,13 @@ class Flow(Connection):
         # 2. 其次使用 container[self][0]
         if self in self.conntainer and self.conntainer[self]:
             start_node = self.conntainer[self][0]
-            print(f"🟢 {self.name}{self.conntainer[self]} 第一个节点作为起始节点: {start_node}")
+            log(f"🟢 {self.name}{self.conntainer[self]} selects entry node: {start_node} as the first node")
+            log_zh(f"🟢 {self.name}{self.conntainer[self]} 第一个节点作为起始节点: {start_node}")
             return start_node
 
         # 3. 都没有就返回 None（对应 exit）
-        print("🔍 没有找到起始节点，正常退出")
+        log(f"🔍 No start node found, exiting normally")
+        log_zh("🔍 没有找到起始节点，正常退出")
         return None
 
     def _get_next_node(self, current_node: Connection, action: str = None) -> Connection | None:
@@ -241,11 +252,13 @@ class Flow(Connection):
             targets = self.all_connections[current_node]
             if action in targets:
                 tgt = targets[action]
-                print(f"🔍 节点 {current_node} 的 action '{action}' 找到下一个节点: {tgt}")
+                log(f"🔍 Node {current_node} with action '{action}' found the next node: {tgt}")
+                log_zh(f"🔍 节点 {current_node} 的 action '{action}' 找到下一个节点: {tgt}")
                 return tgt
 
         # 如果没有找到下一个节点，返回 None（对应 exit）
-        print(f"\n🛑 节点 {current_node} 的 action '{action}' 没有找到下一个节点，正常退出")
+        log(f"\n🛑 Node {current_node} with action '{action}' did not find the next node, exiting normally")
+        log_zh(f"\n🛑 节点 {current_node} 的 action '{action}' 没有找到下一个节点，正常退出")
         return None
 
     # endregion
@@ -381,19 +394,19 @@ if __name__ == "__main__":
 
     # 绘制流程图
     # print(s1.render_dot(saved_file="assets/swarm_dot.png"))
-    for i in s1.render_mermaid(saved_file="assets/swarm_mermaid.png", title=title)[1:]:
-        print(i)
-    pprint(s1.hidden_connections, indent=2, width=30)
-    s1 += n4
-    # s1[n4]
-    for i in s1.render_mermaid(saved_file="assets/swarm_mermaid_2.png", title=title)[1:]:
-        print(i)
-    pprint(s1.hidden_connections, indent=2, width=30)
-    s1 -= n2
-    # s1[~n2]
-    for i in s1.render_mermaid(saved_file="assets/swarm_mermaid_3.png", title=title)[1:]:
-        print(i)
-    pprint(s1.hidden_connections, indent=2, width=30)
+    # for i in s1.render_mermaid(saved_file="assets/swarm_mermaid.png", title=title)[1:]:
+    #     print(i)
+    # pprint(s1.hidden_connections, indent=2, width=30)
+    # s1 += n4
+    # # s1[n4]
+    # for i in s1.render_mermaid(saved_file="assets/swarm_mermaid_2.png", title=title)[1:]:
+    #     print(i)
+    # pprint(s1.hidden_connections, indent=2, width=30)
+    # s1 -= n2
+    # # s1[~n2]
+    # for i in s1.render_mermaid(saved_file="assets/swarm_mermaid_3.png", title=title)[1:]:
+    #     print(i)
+    # pprint(s1.hidden_connections, indent=2, width=30)
 
     # 连接关系
     # pprint(s1.conntainer, indent=2, width=30)

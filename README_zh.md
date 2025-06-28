@@ -5,14 +5,19 @@
   <em>支持同步/异步节点、分支循环、可视化流程图 | 快速搭建 Agent 任务流</em>
   <br><br>
   
-  [![Star](https://img.shields.io/github/stars/jianduo1/agnflow?style=social)](https://github.com/jianduo1/agnflow) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://jianduo1.github.io/agnflow/) [![PyPI](https://img.shields.io/badge/pypi-v0.1.4-blue.svg)](https://pypi.org/project/agnflow/) [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+  [![Star](https://img.shields.io/github/stars/jianduo1/agnflow?style=social)](https://github.com/jianduo1/agnflow) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://jianduo1.github.io/agnflow/) [![PyPI](https://img.shields.io/badge/pypi-v0.1.4-blue.svg)](https://pypi.org/project/agnflow/) [![Downloads](https://img.shields.io/pypi/dm/agnflow)](https://pypi.org/project/agnflow/) [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 </div>
+
 
 <div align="center">
   <br>
-  <img src="assets/rapid-dev.jpeg" alt="agnflow 快速开发工作流" width="600" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  <div style="display: flex; justify-content: center; flex-wrap: wrap;">
+    <img src="assets/rapid-dev/code-zh.png" alt="agnflow 代码示例" height="200" style="border-radius: 8px 0 0 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="assets/rapid-dev/log-zh.png" alt="agnflow 日志输出" height="200" style="border-radius: 0; box-shadow: none; margin-left: 2px;">
+    <img src="assets/rapid-dev/mermaid.png" alt="agnflow 流程图" height="200" style="border-radius: 0 8px 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-left: 2px;">
+  </div>
   <br>
-  <em>🎨 agnflow 可视化工作流设计 - 几分钟内构建复杂的智能体流程</em>
+  <em>💻 代码 → 📊 日志 → 🎨 流程图 - 快速开发复杂的智能体工作流可视化</em>
   <br><br>
 </div>
 

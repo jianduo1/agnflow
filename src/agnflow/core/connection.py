@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Literal
 import asyncio, tempfile, subprocess, warnings
 from pathlib import Path
 import re
@@ -428,15 +428,26 @@ class Connection:
                     used_nodes.update(nested_nodes)
         return lines, used_nodes
 
-    def render_mermaid(self, saved_file: str = None, title: str = ""):
-
-        # 对 title 进行 YAML 安全处理，移除所有特殊字符
-        safe_title = (
-            str(title).replace('"', "").replace("'", "").replace("[", "").replace("]", "").replace("\n", " ").strip()
-        )
-        if not safe_title:
-            safe_title = ""
-        config_block = f"""---\ntitle: "{title}"\nconfig:\n  look: handDrawn\n---\n"""
+    def render_mermaid(
+        self,
+        saved_file: str = None,
+        title: str = "",
+        theme: Literal["default", "neutral", "dark", "forest", "base"] = "forest",
+    ):
+        """渲染 Mermaid 流程图
+        
+        Args:
+            saved_file: 保存文件路径，如果为 None 则只返回文本
+            title: 图表标题
+            theme: 主题
+        """
+        config_block = f"""---
+title: "{title}"
+config:
+  look: handDrawn
+  theme: {theme}
+---
+"""
 
         lines = ["graph TB"]
         clusters = list(self.conntainer.keys()) if hasattr(self, "conntainer") and self.conntainer else [self]
