@@ -40,4 +40,4 @@ flow.run({"msg": "hi"})
 ## 接下来
 
 - 查看 [快速开始](getting-started.md) 页面了解更多使用方法。
-- 深入 [API 参考](api.md) 了解 `Node` 和 `Flow` 的所有功能。 
+- 深入 [API 参考](api-reference.md) 了解 `Node` 和 `Flow` 的所有功能。 

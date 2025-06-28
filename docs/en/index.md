@@ -36,7 +36,7 @@ flow.run({"data": "hello"})
 
 - **[🚀 Getting Started](getting-started.md)** - Learn the basics in minutes
 - **[🧠 Core Concepts](core-concepts.md)** - Understand the fundamental concepts
-- **[🔧 API Reference](api.md)** - Complete API documentation
+- **[�� API Reference](api-reference.md)** - Complete API documentation
 - **[💡 Examples](examples.md)** - Ready-to-run examples
 
 ## 🎯 Why agnflow?
