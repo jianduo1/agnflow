@@ -133,15 +133,15 @@ npm install -g @mermaid-js/mermaid-cli
 <div align="center">
   <p><strong>💬 加入我们的社区，参与讨论、提问和协作！</strong></p>
   
-  <div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin: 20px 0; flex-wrap: wrap;">
-    <div style="text-align: center;">
+  <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px; margin: 20px 0;">
+    <div style="text-align: center; flex-shrink: 0;">
       <img src="assets/wx.jpg" alt="个人微信二维码" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
       <br>
       <strong>个人微信</strong>
       <br>
       <em>直接联系维护者</em>
     </div>
-    <div style="text-align: center;">
+    <div style="text-align: center; flex-shrink: 0;">
       <img src="assets/wxg.jpg" alt="社群微信群二维码" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
       <br>
       <strong>开发者社群</strong>
