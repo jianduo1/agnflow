@@ -1,5 +1,5 @@
 from typing import Any, Dict, Literal
-import asyncio, tempfile, subprocess, warnings
+import asyncio
 from pathlib import Path
 import re
 
@@ -377,7 +377,7 @@ class Connection:
                     lines.extend(tgt.collect_mermaid_edges(visited_edges, visited_nodes, cluster_points))
         return lines
 
-    def render_dot(self, saved_file: str = None):
+    def render_dot(self, saved_file: str = None, format: Literal["png", "svg", "pdf"] = "png"):
         """生成dot格式文本，可选保存为图片，支持所有容器的 cluster 嵌套结构，保证无list混入"""
 
         lines = ["digraph G {", "    rankdir=TB;"]
@@ -391,22 +391,20 @@ class Connection:
         visited_nodes = set()
         for container in containers:
             lines.extend(container.collect_edges(visited_edges, visited_nodes))
-        # 标记起始节点
-        # start_name = self.name if hasattr(self, "name") else "unknown"
-        # lines.append(f'    {start_name} [style=filled, fillcolor="#f9f"];')
         lines.append("}")
         viz_str = "\n".join(lines)
         if saved_file:
             saved_filepath = Path.cwd() / saved_file
+            saved_filepath = saved_filepath.with_suffix("")
             saved_filepath.parent.mkdir(parents=True, exist_ok=True)
-            with tempfile.NamedTemporaryFile("w+", suffix=".dot") as tmp_dot:
-                tmp_dot.write(viz_str)
-                tmp_dot.flush()
-                s, o = subprocess.getstatusoutput(f"dot -Tpng {tmp_dot.name} -o {saved_filepath}")
-                if s != 0:
-                    warnings.warn(f"dot 生成图片失败，检查 dot 是否安装（brew install graphviz）: {o}")
-                else:
-                    return viz_str, saved_filepath
+
+            def dot_to_png(script, filename, format="png"):
+                import graphviz
+
+                graph = graphviz.Source(script)
+                graph.render(filename=filename, format=format, cleanup=True)
+            dot_to_png(viz_str, saved_filepath, format)
+            return viz_str, saved_filepath
         return viz_str, None
 
     def to_mermaid(self, depth=0, visited=None):
@@ -535,19 +533,18 @@ config:
         if saved_file:
             saved_filepath = Path.cwd() / saved_file
             saved_filepath.parent.mkdir(parents=True, exist_ok=True)
-            with tempfile.NamedTemporaryFile("w+", suffix=".mmd", delete=True) as tmp_mmd:
-                tmp_mmd.write(viz_str)
-                tmp_mmd.flush()
-                s, o = subprocess.getstatusoutput(f"mmdc -i {tmp_mmd.name} -o {saved_filepath}")
-                if s != 0:
-                    warnings.warn(
-                        f"mmdc 生成图片失败: {o}\n"
-                        "检查 mmdc 是否安装:\n"
-                        "- npm install -g @mermaid-js/mermaid-cli\n"
-                        "- npx puppeteer browsers install chrome-headless-shell"
-                    )
-                else:
-                    return viz_str, saved_filepath
+            def mermaid_to_png(script,filename):
+                import base64
+                import io, requests
+                from PIL import Image as im
+
+                graphbytes = script.encode("utf8")
+                base64_bytes = base64.urlsafe_b64encode(graphbytes)
+                base64_string = base64_bytes.decode("ascii")
+                img = im.open(io.BytesIO(requests.get("https://mermaid.ink/img/" + base64_string).content))
+                img.save(filename)
+            mermaid_to_png(viz_str, saved_filepath)
+            return viz_str, saved_filepath
         return viz_str, None
 
     # endregion
@@ -561,9 +558,11 @@ if __name__ == "__main__":
     c5 = Connection()
     flow = Connection()
     c1 >> c2
-    c1 >> c2
+    c1 >> c3
     print(c1.connections, c1.conntainer, c1.hidden_connections)
     # print((c1 >> c2 >> c3).chains)
     # print((c1 << [c2, c3] << c4
     # print((c1 << flow[c2, c3 >> c5] << c4
     # print((c1 << flow[c2, c3 >> c5] << c4).hidden_connections)
+    # print(c1.render_mermaid(saved_file="assets/test.png"))
+    # print(c1.render_dot(saved_file="assets/test.svg", format="svg"))

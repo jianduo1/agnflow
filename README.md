@@ -110,15 +110,6 @@ asyncio.run(flow.arun({"data": "hello"}))
 pip install agnflow
 ```
 
-### Optional Dependencies (Flowchart rendering)
-```bash
-# Dot format (recommended)
-brew install graphviz  # macOS
-sudo apt-get install graphviz  # Linux
-
-# Mermaid format
-npm install -g @mermaid-js/mermaid-cli
-```
 
 ## 🤝 Contributing
 
@@ -136,14 +127,14 @@ npm install -g @mermaid-js/mermaid-cli
   <table align="center">
     <tr>
       <td align="center" style="padding: 0 20px;">
-        <img src="assets/wx.jpg" alt="Personal WeChat QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/wx.jpg" alt="Personal WeChat QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
         <br>
         <strong>Personal WeChat</strong>
         <br>
         <em>Direct contact with maintainer</em>
       </td>
       <td align="center" style="padding: 0 20px;">
-        <img src="assets/wxg.jpg" alt="Community WeChat Group QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/wxg.jpg" alt="Community WeChat Group QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
         <br>
         <strong>Community Group</strong>
         <br>

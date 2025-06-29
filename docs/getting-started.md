@@ -87,7 +87,7 @@ final_state = asyncio.run(flow.arun({}))
 # 输出 dot 语言描述
 print(flow.render_dot())
 
-# 保存为 PNG 图片 (需要安装 graphviz)
+# 保存为 PNG 图片
 flow.render_dot(saved_file="./flow.png")
 ```
 

@@ -7,6 +7,37 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import List
+from collections import OrderedDict
+import time
+
+
+class ShortTermMemory(OrderedDict):
+    def __init__(self, capacity=100, ttl=60):  # capacity最大容量，ttl存活时间（秒）
+        self.memory = OrderedDict()  # 有序字典保持时序
+        self.capacity = capacity
+        self.ttl = ttl
+
+    def add(self, key, value):
+        # 移除过期数据
+        self._remove_expired()
+        # 保持容量限制（LRU策略）
+        if len(self.memory) >= self.capacity:
+            self.memory.popitem(last=False)  # 移除最早添加的
+        self.memory[key] = (value, time.time())  # 存储值和时间戳
+
+    def get(self, key):
+        self._remove_expired()
+        return self.memory.get(key, (None, None))[0]
+
+    def _remove_expired(self):
+        current_time = time.time()
+        to_remove = [k for k, (v, ts) in self.memory.items() if current_time - ts > self.ttl]
+        for k in to_remove:
+            del self.memory[k]
+
+    def get_all(self):
+        self._remove_expired()
+        return [v for v, _ in self.memory.values()]
 
 
 class ShortTermMemory:
@@ -176,4 +207,3 @@ if __name__ == "__main__":
     memory.remember("AI智能体应该遵循有益、无害和诚实的原则。")
     recalled_info = memory.recall("AI智能体应遵循什么原则？")
     print(f"回忆的信息 (来自长期记忆): {recalled_info}")
-
