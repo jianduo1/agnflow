@@ -133,22 +133,24 @@ npm install -g @mermaid-js/mermaid-cli
 <div align="center">
   <p><strong>💬 Join our community for discussions, questions, and collaboration!</strong></p>
   
-  <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px; margin: 20px 0;">
-    <div style="text-align: center; flex-shrink: 0;">
-      <img src="assets/wx.jpg" alt="Personal WeChat QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-      <br>
-      <strong>Personal WeChat</strong>
-      <br>
-      <em>Direct contact with maintainer</em>
-    </div>
-    <div style="text-align: center; flex-shrink: 0;">
-      <img src="assets/wxg.jpg" alt="Community WeChat Group QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-      <br>
-      <strong>Community Group</strong>
-      <br>
-      <em>Join our developer community</em>
-    </div>
-  </div>
+  <table align="center">
+    <tr>
+      <td align="center" style="padding: 0 20px;">
+        <img src="assets/wx.jpg" alt="Personal WeChat QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <br>
+        <strong>Personal WeChat</strong>
+        <br>
+        <em>Direct contact with maintainer</em>
+      </td>
+      <td align="center" style="padding: 0 20px;">
+        <img src="assets/wxg.jpg" alt="Community WeChat Group QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <br>
+        <strong>Community Group</strong>
+        <br>
+        <em>Join our developer community</em>
+      </td>
+    </tr>
+  </table>
   
   <p><em>Feel free to reach out for questions, suggestions, or just to say hello! 👋</em></p>
 </div>

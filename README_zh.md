@@ -133,22 +133,24 @@ npm install -g @mermaid-js/mermaid-cli
 <div align="center">
   <p><strong>💬 加入我们的社区，参与讨论、提问和协作！</strong></p>
   
-  <div style="display: flex; justify-content: center; align-items: flex-start; gap: 40px; margin: 20px 0;">
-    <div style="text-align: center; flex-shrink: 0;">
-      <img src="assets/wx.jpg" alt="个人微信二维码" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-      <br>
-      <strong>个人微信</strong>
-      <br>
-      <em>直接联系维护者</em>
-    </div>
-    <div style="text-align: center; flex-shrink: 0;">
-      <img src="assets/wxg.jpg" alt="社群微信群二维码" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-      <br>
-      <strong>开发者社群</strong>
-      <br>
-      <em>加入我们的开发者社区</em>
-    </div>
-  </div>
+  <table align="center">
+    <tr>
+      <td align="center" style="padding: 0 20px;">
+        <img src="assets/wx.jpg" alt="个人微信二维码" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <br>
+        <strong>个人微信</strong>
+        <br>
+        <em>直接联系维护者</em>
+      </td>
+      <td align="center" style="padding: 0 20px;">
+        <img src="assets/wxg.jpg" alt="社群微信群二维码" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <br>
+        <strong>开发者社群</strong>
+        <br>
+        <em>加入我们的开发者社区</em>
+      </td>
+    </tr>
+  </table>
   
   <p><em>欢迎随时联系我们，提出问题、建议或只是打个招呼！👋</em></p>
 </div>
