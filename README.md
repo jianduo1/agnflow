@@ -31,7 +31,7 @@ from agnflow import Node, Flow
 n1 = Node("hello", exec=lambda s: {"msg": "world"})
 n2 = Node("world", exec=print)
 state = {"data": "hello"}
-Flow(n1 >> n2).run(state)  # Output: {'msg': 'world'}
+Flow(n1 >> n2).run(state)  # Output: {"data": "hello", 'msg': 'world'}
 ```
 
 ### 🎨 **Auto Visual Flowcharts**
@@ -84,9 +84,9 @@ asyncio.run(flow.arun({"data": "hello"}))
 
 | Feature | Code Example | Visual |
 |:-------:|:-------------|:------:|
-| **Complex Connections** | `n1 >> [n2 >> n3, n3 >> n4] >> n5` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="120" alt="Complex Connections"> |
-| **Swarm Agents** | `s1[n1, n2, n3] >> n4` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="120" alt="Swarm Agents"> |
-| **Runtime Management** | `flow += new_node`<br>`flow -= old_node` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="120" alt="Runtime Management"> |
+| **Complex Connections** | `n1 >> [n2 >> n3, n3 >> n4] >> n5` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="Complex Connections"> |
+| **Supervisor Agents** | `s1[n1, n2, n3] >> n4` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="Swarm Agents"> |
+| **Runtime Management** | `flow += new_node`<br>`flow -= old_node` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="Runtime Management"> |
 
 ## 📚 Documentation
 
@@ -127,6 +127,31 @@ npm install -g @mermaid-js/mermaid-cli
 3. Submit [PRs](https://github.com/jianduo1/agnflow/pulls) for improvements
 
 **Maintainer**: [@jianduo1](https://github.com/jianduo1) | **License**: MIT
+
+### 📞 Contact & Community
+
+<div align="center">
+  <p><strong>💬 Join our community for discussions, questions, and collaboration!</strong></p>
+  
+  <div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin: 20px 0; flex-wrap: wrap;">
+    <div style="text-align: center;">
+      <img src="assets/wx.jpg" alt="Personal WeChat QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+      <br>
+      <strong>Personal WeChat</strong>
+      <br>
+      <em>Direct contact with maintainer</em>
+    </div>
+    <div style="text-align: center;">
+      <img src="assets/wxg.jpg" alt="Community WeChat Group QR Code" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+      <br>
+      <strong>Community Group</strong>
+      <br>
+      <em>Join our developer community</em>
+    </div>
+  </div>
+  
+  <p><em>Feel free to reach out for questions, suggestions, or just to say hello! 👋</em></p>
+</div>
 
 # 8. 🔮 Future Roadmap
 

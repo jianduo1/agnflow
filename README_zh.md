@@ -31,7 +31,7 @@ from agnflow import Node, Flow
 n1 = Node("hello", exec=lambda s: {"msg": "world"})
 n2 = Node("world", exec=print)
 state = {"data": "hello"}
-Flow(n1 >> n2).run(state)  # 输出: {'msg': 'world'}
+Flow(n1 >> n2).run(state)  # 输出: {"data": "hello", 'msg': 'world'}
 ```
 
 ### 🎨 **自动可视化流程图**
@@ -84,9 +84,9 @@ asyncio.run(flow.arun({"data": "hello"}))
 
 | 功能 | 代码示例 | 可视化 |
 |:----:|:---------|:------:|
-| **复杂连接** | `n1 >> [n2 >> n3, n3 >> n4] >> n5` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="120" alt="复杂连接"> |
-| **蜂群智能体** | `s1[n1, n2, n3] >> n4` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="120" alt="蜂群智能体"> |
-| **运行期管理** | `flow += new_node`<br>`flow -= old_node` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="120" alt="运行期管理"> |
+| **复杂连接** | `n1 >> [n2 >> n3, n3 >> n4] >> n5` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="复杂连接"> |
+| **监督者智能体** | `s1[n1, n2, n3] >> n4` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="蜂群智能体"> |
+| **运行期管理** | `flow += new_node`<br>`flow -= old_node` | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="运行期管理"> |
 
 ## 📚 文档
 
@@ -128,6 +128,30 @@ npm install -g @mermaid-js/mermaid-cli
 
 **维护者**: [@jianduo1](https://github.com/jianduo1) | **许可证**: MIT
 
+### 📞 联系方式与社区
+
+<div align="center">
+  <p><strong>💬 加入我们的社区，参与讨论、提问和协作！</strong></p>
+  
+  <div style="display: flex; justify-content: center; align-items: center; gap: 30px; margin: 20px 0; flex-wrap: wrap;">
+    <div style="text-align: center;">
+      <img src="assets/wx.jpg" alt="个人微信二维码" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+      <br>
+      <strong>个人微信</strong>
+      <br>
+      <em>直接联系维护者</em>
+    </div>
+    <div style="text-align: center;">
+      <img src="assets/wxg.jpg" alt="社群微信群二维码" width="150" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+      <br>
+      <strong>开发者社群</strong>
+      <br>
+      <em>加入我们的开发者社区</em>
+    </div>
+  </div>
+  
+  <p><em>欢迎随时联系我们，提出问题、建议或只是打个招呼！👋</em></p>
+</div>
 
 ## 🔮 未来规划
 
