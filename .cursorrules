@@ -19,6 +19,13 @@
 - **格式统一**  
   - 保持中英文文档的结构、序号、标题层级完全一致  
 
+### 🖼️ 图片引用规范
+- **GitHub Raw URL 前缀**  
+  - 所有项目图片引用必须使用完整 GitHub raw URL  
+  - 格式：`https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/图片名称`  
+  - 禁止使用相对路径如 `assets/图片名称`  
+  - 确保图片在 GitHub 页面和外部链接中都能正常显示  
+
 ### ✨ 呈现规范
 - **视觉强化**  
   - 使用 emoji 作为段落标识（如本模板所示）  
