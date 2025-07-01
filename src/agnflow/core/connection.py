@@ -52,8 +52,11 @@ class Connection:
     """
 
     connections: "dict[Connection,dict[str,Connection]]" = {}  # {source: {action: target}}
+    """全局工作流节点连接"""
     conntainer: "dict[Connection,list[Connection]]" = {}  # 区分内连接和外连接的容器
+    """全局工作流节点容器"""
     hidden_connections: "dict[Connection,dict[str,Connection]]" = {}  # {source: {action: target}}
+    """全局工作流节点隐式连接"""
 
     def __init__(self, name: str = None, chains: "list[Connection]" = None):
         self.chains: list[Connection] = chains or [self]  # [source , ... , target]

@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import Literal, TypedDict
 import yaml
 import traceback
 
@@ -22,7 +22,7 @@ class ThinkNode(Node):
     TAO（思考-行动-观察）节点实现基于TAO模式的智能代理节点，包括思考决策、行动执行和结果观察功能。实现了AI代理的自主决策和迭代改进能力。
     """
 
-    def exec(self, state):
+    def exec(self, state) -> Literal['exit'] | Literal['action']:
         """准备阶段：准备思考所需的上下文"""
         query = state.get("query", "")
         observations = state.get("observations", [])
@@ -82,17 +82,17 @@ class ThinkNode(Node):
         if thought_data.get("is_final", False):
             state["final_answer"] = thought_data["action_input"]
             print(f"🎯 Final Answer: {thought_data['action_input']}")
-            return "end"
+            return "exit"
 
         # 否则继续执行行动
         print(f"🤔 思考 {thought_data['thought_number']}: 决定执行 {thought_data['action']}")
-        return "action", state
+        return "action"
 
 
 class ActionNode(Node):
     """行动节点 - 执行决定的行动"""
 
-    def exec(self, state):
+    def exec(self, state) -> Literal['observe']:
         # 准备阶段：准备执行行动
         action = state["current_action"]
         action_input = state["current_action_input"]
@@ -121,7 +121,7 @@ class ActionNode(Node):
         print(f"✅ 行动完成, 结果获取")
 
         # 继续到观察节点
-        return "observe", state
+        return "observe"
 
     # 模拟工具函数
     def search_web(self, query):
@@ -141,7 +141,7 @@ class ActionNode(Node):
 class ObserveNode(Node):
     """观察节点 - 分析行动结果并生成观察"""
 
-    def exec(self, state):
+    def exec(self, state) -> Literal['think']:
         # 准备阶段：准备观察数据
         action = state["current_action"]
         action_input = state["current_action_input"]
@@ -172,7 +172,7 @@ class ObserveNode(Node):
         state["observations"].append(observation)
 
         # 继续思考
-        return "think", state
+        return "think"
 
 
 class TAOFlow(Flow):

@@ -346,7 +346,7 @@ if __name__ == "__main__":
 class Swarm(Flow):
     """蜂群智能体（蜂群节点全互连）"""
 
-    def __getitem__(self, node: list[Node]) -> Self:
+    def __getitem__(self, node: "list[Node] | Any") -> Self:
         """重载运算符 self[key]，获取子工作流
 
         Swarm[n1, n2, n3]
@@ -358,17 +358,22 @@ class Swarm(Flow):
         # 统一转为 list
         if not isinstance(node, (list, tuple)):
             node = [node]
-        conntainer = self.conntainer.setdefault(self, [])
+
         # 预判加完后的总数
+        conntainer = self.conntainer.setdefault(self, [])
         new_total = len(conntainer) + len([n for n in node if n not in conntainer])
         if new_total < 2:
             raise ValueError("Swarm只能接受两个以上节点")
+
+        # 把节点添加到容器
         for n in node:
             if n not in conntainer:
                 conntainer.append(n)
-        # 全互连，显式连接
+        
+        # 显式连接：节点全互连
         super().__getitem__(slice(conntainer, conntainer))
-        # 补全隐式连接
+        
+        # 隐式连接
         for i in conntainer:
             for j in conntainer:
                 if i is not j:
@@ -388,7 +393,7 @@ if __name__ == "__main__":
     s3 = Swarm()
 
     # fmt: off
-    n1>>s1[ n2, n3];title=get_code_line()[0]
+    # n1>>s1[ n2, n3];title=get_code_line()[0]
     # s1[n1, n2, n3,n4];title=get_code_line()[0]
     # n1 >> s1[n2, n3] >> n4;title=get_code_line()
     # s1[n1, n2] >> s2[n3, n4];title = get_code_line()
@@ -418,3 +423,42 @@ if __name__ == "__main__":
     # 执行流程
     # s1.run({}, max_steps=10, entry_action="n2")
 
+
+class ParallelFlow(Flow):
+    """并行节点"""
+
+    def __getitem__(self, nodes: list[Node]):
+        """重载运算符 self[key]，获取子节点"""
+        container = self.conntainer.setdefault(self, [])
+        container.extend(nodes)
+        return self
+
+    async def execute_workflow(
+        self, state: dict, remaining_steps: int = 10, entry_action: str = None, is_async: bool = False
+    ) -> Any:
+        """并行节点执行工作流"""
+        container = self.conntainer.get(self, [])
+        await asyncio.gather(
+            *[node.execute_workflow(state, remaining_steps, entry_action, is_async) for node in container]
+        )
+
+
+if __name__ == "__main__":
+    from agnflow.core.flow import Flow
+    import asyncio
+
+    async def sleep_and_print(self, state):
+        ns = {"n1": 3, "n2": 2, "n3": 1}
+        n = ns[self.name]
+        await asyncio.sleep(n)
+        print(f" {self.name}: sleep: {n}s state:{state}")
+
+    n1 = Node(aexec=sleep_and_print)
+    n2 = Node(aexec=sleep_and_print)
+    n3 = Node(aexec=sleep_and_print)
+    pf = ParallelFlow()
+    pf[n1, n2, n3]
+
+    asyncio.run(pf.arun({"a": 1}))
+    # print(pn.connections)
+    print(pf.render_mermaid(saved_file="assets/parallel_flow.png", title="并行运行工作流示例"))

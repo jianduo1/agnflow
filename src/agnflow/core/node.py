@@ -2,7 +2,6 @@ from typing import Any, Callable
 import asyncio, time, inspect
 
 from agnflow.core.connection import Connection
-from agnflow.agent.llm import UserMsg, call_llm
 
 
 class Node(Connection):
@@ -36,9 +35,9 @@ class Node(Connection):
             try:
                 # ⭐️ 调用自定义或者默认执行器（exec/aexec），根据 is_async 选择同步/异步
                 if is_async:
-                    return await self._call_with_params(self.aexec, state)
+                    return await self._call_with_params(self.aexec, self, state)
                 else:
-                    return self._call_with_params(self.exec, state)
+                    return self._call_with_params(self.exec, self, state)
             except Exception as exc:
                 # ⭐️ 执行错误处理
                 if self.cur_retry == self.max_retries - 1:
@@ -52,7 +51,7 @@ class Node(Connection):
                     else:
                         time.sleep(self.wait)
 
-    def _call_with_params(self, executor: Callable, state: dict) -> Any:
+    def _call_with_params(self, executor: Callable, instance: Any, state: dict) -> Any:
         """根据函数签名智能调用执行器
 
         步骤：
@@ -77,6 +76,7 @@ class Node(Connection):
 
         for param_name, param in params.items():
             if param_name == "self":
+                call_kwargs[param_name] = instance
                 continue
 
             # 如果参数有默认值，使用默认值
@@ -116,7 +116,6 @@ class Node(Connection):
     # endregion
 
 
-
 if __name__ == "__main__":
     from agnflow.utils.code import get_code_line
 
@@ -126,7 +125,7 @@ if __name__ == "__main__":
     n4 = Node()
     n5 = Node()
     # fmt: off
-    n1 >> [n2 >> n3, n3 >>n4] >> n5; title=get_code_line()[0]
+    # n1 >> [n2 >> n3, n3 >>n4] >> n5; title=get_code_line()[0]
     # fmt: on
-    print(n1.connections)
-    print(n1.render_mermaid(saved_file="assets/node_mermaid.png", title=title))
+    # print(n1.connections)
+    # print(n1.render_mermaid(saved_file="assets/node_mermaid.png", title=title))
