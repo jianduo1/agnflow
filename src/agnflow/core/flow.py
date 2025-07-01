@@ -1,4 +1,5 @@
 from typing import Any, Dict, Self
+import traceback
 
 from agnflow.core.connection import Connection
 from agnflow.core.node import Node
@@ -173,6 +174,7 @@ class Flow(Connection):
 
             except Exception as e:
                 print(f"🚨 节点 {current_node} 执行出错: {e}")
+                traceback.print_exc()
                 result = "error"
 
             # ⭐️ 处理执行结果
@@ -415,3 +417,4 @@ if __name__ == "__main__":
 
     # 执行流程
     # s1.run({}, max_steps=10, entry_action="n2")
+

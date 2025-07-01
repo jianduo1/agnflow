@@ -1,0 +1,6 @@
+Added numpy>=2.3.1 as regular dependency
+Added faiss-cpu==1.7.0 as regular dependency
+Reusing already existing virtualenv
+Generating production lockfile: /Users/mac/Documents/note/python/deeptest/agnflow/requirements.lock
+Generating dev lockfile: /Users/mac/Documents/note/python/deeptest/agnflow/requirements-dev.lock
+Installing dependencies

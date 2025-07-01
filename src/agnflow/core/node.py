@@ -1,6 +1,8 @@
 from typing import Any, Callable
 import asyncio, time, inspect
+
 from agnflow.core.connection import Connection
+from agnflow.agent.llm import UserMsg, call_llm
 
 
 class Node(Connection):
@@ -114,6 +116,7 @@ class Node(Connection):
     # endregion
 
 
+
 if __name__ == "__main__":
     from agnflow.utils.code import get_code_line
 
@@ -126,4 +129,4 @@ if __name__ == "__main__":
     n1 >> [n2 >> n3, n3 >>n4] >> n5; title=get_code_line()[0]
     # fmt: on
     print(n1.connections)
-    # print(n1.render_mermaid(saved_file="assets/node_mermaid.png", title=title))
+    print(n1.render_mermaid(saved_file="assets/node_mermaid.png", title=title))

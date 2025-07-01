@@ -1,9 +1,10 @@
-from typing import Annotated, Any, Literal, List, Dict, TypedDict, Union, overload
+from typing import Annotated, Any, Literal, List, Dict, TypedDict, Iterable, Callable
 import os
 import json
+from openai.types.chat.chat_completion_chunk import ChatCompletionChunk
 import yaml
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, Stream
 from langchain_qwq import ChatQwQ
 
 load_dotenv()
@@ -14,10 +15,13 @@ class Msg(List[Dict[Literal["user", "system", "assistant"], str]]):
 
     role = None
 
-    def __init__(self, msgs_content: "Msg | str"):
-        if self.role and isinstance(msgs_content, str):
-            msgs_content = [{"role": self.role, "content": msgs_content}]
-        super().__init__(msgs_content)
+    def __init_subclass__(cls, role: str) -> None:
+        cls.role = role
+
+    def __init__(self, msg_content: "Msg | str"):
+        if self.role and isinstance(msg_content, str):
+            msg_content = [{"role": self.role, "content": msg_content}]
+        super().__init__(msg_content)
 
     def __add__(self, other: "Msg") -> "Msg":
         """重载加法运算符，支持消息列表的合并"""
@@ -27,22 +31,16 @@ class Msg(List[Dict[Literal["user", "system", "assistant"], str]]):
             raise TypeError(f"不支持的类型: {type(other)}")
 
 
-class UserMsg(Msg):
+class UserMsg(Msg, role="user"):
     """用户消息类，支持链式操作"""
 
-    role = "user"
 
-
-class SysMsg(Msg):
+class SysMsg(Msg, role="system"):
     """系统消息类，支持链式操作"""
 
-    role = "system"
 
-
-class AiMsg(Msg):
+class AiMsg(Msg, role="assistant"):
     """助手消息类，支持链式操作"""
-
-    role = "assistant"
 
 
 def call_llm(
@@ -67,6 +65,21 @@ def call_llm(
         res = res.strip().removeprefix("```json").removesuffix("```").strip()
         return json.loads(res)
     raise ValueError(f"不支持的输出格式: {output_format}")
+
+
+def stream_llm(prompt):
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+    # Make a streaming chat completion request
+    chunks: Stream[ChatCompletionChunk] = client.chat.completions.create(
+        model="glm-4-flashx-250414",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+        stream=True,  # Enable streaming
+    )
+    for chunk in chunks:
+        if content := chunk.choices[0].delta.content:
+            yield content
 
 
 class JsonSchema(TypedDict):
@@ -174,40 +187,49 @@ def llm_json_stream(
 
 
 if __name__ == "__main__":
-    # msgs = Msg([{"role": "user", "content": "你好"}]) + Msg([{"role": "system", "content": "你是谁"}]) + Msg([{"role": "assistant", "content": "我是AI"}])
-    # msgs += UserMsg("你好2") + SysMsg("你是谁2") + AiMsg("我是AI2")
-    # print("消息列表:", msgs)
+    msgs = (
+        Msg([{"role": "user", "content": "你好"}])
+        + Msg([{"role": "system", "content": "你是谁"}])
+        + Msg([{"role": "assistant", "content": "我是AI"}])
+    )
+    msgs += UserMsg("你好2") + SysMsg("你是谁2") + AiMsg("我是AI2")
+    print("消息列表:", msgs)
 
-    from openai import OpenAI
+    # from openai import OpenAI
 
-    def my_validation_func(js):
-        return isinstance(js, dict) and js.get("valid") is True
+    # def my_validation_func(js):
+    #     return isinstance(js, dict) and js.get("valid") is True
 
-    client = OpenAI()
-    json_schema = {"reason": "str", "valid": "bool"}
-    message = "请帮我写一个Python冒泡排序"
-    print("OpenAI流式输出示例：")
-    for chunk in llm_json_stream(
-        message=message, json_schema=json_schema, history_msgs=[], mdoel=client, validation_func=my_validation_func
-    ):
-        if chunk["type"] == "json":
-            print("校验信息：", chunk["data"])
-        elif chunk["type"] == "text":
-            print("正文流：", chunk["data"], end="", flush=True)
-        elif chunk["type"] == "error":
-            print("错误：", chunk["data"])
+    # client = OpenAI()
+    # json_schema = {"reason": "str", "valid": "bool"}
+    # message = "请帮我写一个Python冒泡排序"
+    # print("OpenAI流式输出示例：")
+    # for chunk in llm_json_stream(
+    #     message=message, json_schema=json_schema, history_msgs=[], mdoel=client, validation_func=my_validation_func
+    # ):
+    #     if chunk["type"] == "json":
+    #         print("校验信息：", chunk["data"])
+    #     elif chunk["type"] == "text":
+    #         print("正文流：", chunk["data"], end="", flush=True)
+    #     elif chunk["type"] == "error":
+    #         print("错误：", chunk["data"])
 
-    # ChatQwQ 示例
-    from langchain_qwq import ChatQwQ
+    # # ChatQwQ 示例
+    # from langchain_qwq import ChatQwQ
 
-    client2 = ChatQwQ(api_key="你的API_KEY")
-    print("\nChatQwQ流式输出示例：")
-    for chunk in llm_json_stream(
-        message=message, json_schema=json_schema, history_msgs=[], mdoel=client2, validation_func=my_validation_func
-    ):
-        if chunk["type"] == "json":
-            print("校验信息：", chunk["data"])
-        elif chunk["type"] == "text":
-            print("正文流：", chunk["data"], end="", flush=True)
-        elif chunk["type"] == "error":
-            print("错误：", chunk["data"])
+    # client2 = ChatQwQ(api_key="你的API_KEY")
+    # print("\nChatQwQ流式输出示例：")
+    # for chunk in llm_json_stream(
+    #     message=message, json_schema=json_schema, history_msgs=[], mdoel=client2, validation_func=my_validation_func
+    # ):
+    #     if chunk["type"] == "json":
+    #         print("校验信息：", chunk["data"])
+    #     elif chunk["type"] == "text":
+    #         print("正文流：", chunk["data"], end="", flush=True)
+    #     elif chunk["type"] == "error":
+    #         print("错误：", chunk["data"])
+
+    from granian import Server
+    app =None
+    server = Server(app, interface="asgi", host="0.0.0.0", port=8000, workers=2)
+    server.start()

@@ -34,8 +34,8 @@ charset-normalizer==3.4.2
 click==8.2.1
     # via black
     # via duckduckgo-search
+    # via granian
     # via mkdocs
-    # via uvicorn
 colorama==0.4.6
     # via mkdocs-material
 csscompressor==0.9.5
@@ -66,11 +66,12 @@ gitdb==4.0.12
     # via gitpython
 gitpython==3.1.44
     # via mkdocs-git-revision-date-localized-plugin
+granian==2.4.0
+    # via agnflow
 graphviz==0.21
     # via agnflow
 h11==0.16.0
     # via httpcore
-    # via uvicorn
 hf-xet==1.1.5
     # via huggingface-hub
 htmlmin2==0.1.13
@@ -173,7 +174,7 @@ networkx==3.5
     # via torch
 nh3==0.2.21
     # via readme-renderer
-numpy==2.3.0
+numpy==2.3.1
     # via agnflow
     # via scikit-learn
     # via scipy
@@ -342,8 +343,6 @@ typing-inspection==0.4.1
 urllib3==2.5.0
     # via requests
     # via twine
-uvicorn==0.34.3
-    # via agnflow
 watchdog==6.0.0
     # via mkdocs
 wcwidth==0.2.13

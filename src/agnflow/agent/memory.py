@@ -9,7 +9,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 from typing import List
 from collections import OrderedDict
 import time
+import os
+import numpy as np
+from openai import OpenAI
+from dotenv import load_dotenv
+import faiss
 
+
+load_dotenv()
 
 class ShortTermMemory(OrderedDict):
     def __init__(self, capacity=100, ttl=60):  # capacity最大容量，ttl存活时间（秒）
@@ -39,29 +46,14 @@ class ShortTermMemory(OrderedDict):
         self._remove_expired()
         return [v for v, _ in self.memory.values()]
 
-
-class ShortTermMemory:
-    """一个简单的基于字典的短期记忆实现。"""
-
-    def __init__(self):
-        self._memory = {}
-
-    def add(self, key: str, value):
-        """向短期记忆中添加或更新一个键值对。"""
-        self._memory[key] = value
-
-    def get(self, key: str):
-        """从短期记忆中检索一个值。"""
-        return self._memory.get(key)
-
     def delete(self, key: str):
         """从短期记忆中删除一个键。"""
-        if key in self._memory:
-            del self._memory[key]
+        if key in self.memory:
+            del self.memory[key]
 
     def clear(self):
         """清空所有短期记忆。"""
-        self._memory.clear()
+        self.memory.clear()
 
 
 class LongTermMemory:
@@ -163,6 +155,61 @@ class Memory:
     def recall(self, query: str, top_k=3):
         """从长期记忆中回忆与查询相关的信息。"""
         return self.long_term.search(query, top_k=top_k)
+
+
+class Memory:
+    def __init__(self, max_short_term=6, dimension=1536):
+        self.messages = []
+        self.max_short_term = max_short_term
+        self.dimension = dimension
+        self.vector_index = faiss.IndexFlatL2(dimension)
+        self.vector_items = []
+
+    # ====== 短期记忆相关 ======
+    def add_message(self, role, content):
+        self.messages.append({"role": role, "content": content})
+        if len(self.messages) > self.max_short_term:
+            self.archive_oldest_pair()
+
+    # ====== 长期记忆相关 ======
+    def archive_oldest_pair(self):
+        """将最老的一对用户和助手消息转换为向量并添加到向量索引中"""
+        if len(self.messages) < 2:
+            return
+        # 获取和移除最早的一对用户和助手消息 -> 提取合并用户和助手消息
+        oldest_pair = self.messages[:2]
+        self.messages = self.messages[2:]
+        user_msg = next((m for m in oldest_pair if m["role"] == "user"), {"content": ""})
+        assistant_msg = next((m for m in oldest_pair if m["role"] == "assistant"), {"content": ""})
+        combined = f"用户: {user_msg['content']} 助手: {assistant_msg['content']}"
+
+        # 消息 -> 嵌入向量 -> numpy数组 -> 保存向量 -> 保存消息
+        vector = self.get_embedding_vector(combined)
+
+        self.vector_index.add(vector)
+        self.vector_items.append(oldest_pair)
+
+    def retrieve_similar(self, query, k=1):
+        """检索与查询最相似的向量"""
+        if not self.vector_items:
+            return None
+        query_vector = self.get_embedding_vector(query)
+
+        k = min(k, self.vector_index.ntotal)
+        distances, indices = self.vector_index.search(query_vector, k)
+        indices = indices[0].tolist()
+        distances = distances[0].tolist()
+        if not indices:
+            return None
+        return {"conversation": self.vector_items[indices[0]], "distance": distances[0]}
+
+    def get_embedding_vector(self, text):
+        """获取文本的向量嵌入"""
+        client = OpenAI(base_url=os.getenv("EMBEDDING_BASE_URL"), api_key=os.getenv("EMBEDDING_API_KEY"))
+        response = client.embeddings.create(model=os.getenv("EMBEDDING_MODEL"), input=text)
+        embedding = response.data[0].embedding
+        query_vector = np.array(embedding, dtype=np.float32).reshape(1, -1).astype(np.float32)
+        return query_vector
 
 
 if __name__ == "__main__":
