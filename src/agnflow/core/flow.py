@@ -1,14 +1,15 @@
-from typing import Any, Dict, Self
+from typing import Any, Dict, Self, TypeVar
 import traceback
 
 from agnflow.core.connection import Connection
 from agnflow.core.node import Node
 
+do_nothing = lambda *x: ...
 log_zh = print
-log = lambda *x: ...
+log = do_nothing
 
-
-class Flow(Connection):
+StateType = TypeVar("StateType", bound=dict)
+class Flow(Connection[StateType]):
     """工作流容器"""
 
     def __init__(self, name: str = None):
@@ -169,9 +170,6 @@ class Flow(Connection):
                     state, remaining_steps=remaining_steps - step, is_async=is_async
                 )
 
-                log(f"🔍 Node {current_node} execution result: {result}")
-                log_zh(f"🔍 节点 {current_node} 执行结果: {result}")
-
             except Exception as e:
                 print(f"🚨 节点 {current_node} 执行出错: {e}")
                 traceback.print_exc()
@@ -238,8 +236,8 @@ class Flow(Connection):
             return start_node
 
         # 3. 都没有就返回 None（对应 exit）
-        log(f"🔍 No start node found, exiting normally")
-        log_zh("🔍 没有找到起始节点，正常退出")
+        log(f"🛑 No start node found, exiting normally")
+        log_zh("🛑 没有找到起始节点，正常退出")
         return None
 
     def _get_next_node(self, current_node: Connection, action: str = None) -> Connection | None:
@@ -254,8 +252,8 @@ class Flow(Connection):
             targets = self.all_connections[current_node]
             if action in targets:
                 tgt = targets[action]
-                log(f"🔍 Node {current_node} with action '{action}' found the next node: {tgt}")
-                log_zh(f"🔍 节点 {current_node} 的 action '{action}' 找到下一个节点: {tgt}")
+                log(f"🔵 transfer to the next node: {tgt} 🚀")
+                log_zh(f"🔵 流转下一个节点: {tgt}")
                 return tgt
 
         # 如果没有找到下一个节点，返回 None（对应 exit）
@@ -425,7 +423,7 @@ if __name__ == "__main__":
 
 
 class ParallelFlow(Flow):
-    """并行节点"""
+    """并行工作流"""
 
     def __getitem__(self, nodes: list[Node]):
         """重载运算符 self[key]，获取子节点"""

@@ -1,3 +1,4 @@
+from textwrap import dedent
 from typing import Literal, TypedDict
 import yaml
 import traceback
@@ -16,13 +17,13 @@ class TAOState(TypedDict):
     current_action_input: str
 
 
-class ThinkNode(Node):
+class ThinkNode(Node[TAOState]):
     """思考节点 - 分析当前情况并决定下一步行动
 
     TAO（思考-行动-观察）节点实现基于TAO模式的智能代理节点，包括思考决策、行动执行和结果观察功能。实现了AI代理的自主决策和迭代改进能力。
     """
 
-    def exec(self, state) -> Literal['exit'] | Literal['action']:
+    def exec(self, state: TAOState) -> Literal["exit"] | Literal["action"]:
         """准备阶段：准备思考所需的上下文"""
         query = state.get("query", "")
         observations = state.get("observations", [])
@@ -40,7 +41,8 @@ class ThinkNode(Node):
         # 执行阶段：执行思考过程，决定下一步行动
 
         # 构建提示词
-        prompt = f"""
+        prompt = dedent(
+            f"""
         你是AI助手，需要根据用户的问题和之前的观察，思考下一步的行动。
         
         用户的问题: {query}
@@ -57,6 +59,7 @@ class ThinkNode(Node):
         is_final: <如果这是最终答案, 设置为 true, 否则为 false>
         ```
         """
+        )
 
         # 调用LLM获取思考结果
         response = call_llm(UserMsg(prompt))
@@ -89,10 +92,10 @@ class ThinkNode(Node):
         return "action"
 
 
-class ActionNode(Node):
+class ActionNode(Node[TAOState]):
     """行动节点 - 执行决定的行动"""
 
-    def exec(self, state) -> Literal['observe']:
+    def exec(self, state: TAOState) -> Literal["observe"]:
         # 准备阶段：准备执行行动
         action = state["current_action"]
         action_input = state["current_action_input"]
@@ -138,10 +141,10 @@ class ActionNode(Node):
             return f"无法计算表达式: {expression}"
 
 
-class ObserveNode(Node):
+class ObserveNode(Node[TAOState]):
     """观察节点 - 分析行动结果并生成观察"""
 
-    def exec(self, state) -> Literal['think']:
+    def exec(self, state: TAOState) -> Literal["think"]:
         # 准备阶段：准备观察数据
         action = state["current_action"]
         action_input = state["current_action_input"]
@@ -150,7 +153,8 @@ class ObserveNode(Node):
         # 执行阶段：分析行动结果，生成观察
 
         # 构建提示词
-        prompt = f"""
+        prompt = dedent(
+            f"""
         你是观察者，需要分析行动结果并提供客观的观察。
         
         行动: {action}
@@ -159,6 +163,7 @@ class ObserveNode(Node):
         
         请提供一个简洁的观察结果。不要做出决定，只描述你看到的内容。
         """
+        )
 
         # 调用LLM获取观察结果
         observation = call_llm(UserMsg(prompt))
@@ -175,16 +180,16 @@ class ObserveNode(Node):
         return "think"
 
 
-class TAOFlow(Flow):
+class TAOFlow(Flow[TAOState]):
     def __init__(self, name: str = None):
-        super().__init__(name)
-        think = ThinkNode()
-        action = ActionNode()
-        observe = ObserveNode()
-        self[think >> action >> observe]
+        super().__init__(name=name)
+        self.think_node = ThinkNode(name="think-node")
+        self.action_node = ActionNode(name="action-node")
+        self.observe_node = ObserveNode(name="observe-node")
+        self[self.think_node >> self.action_node >> self.observe_node]
 
 
 if __name__ == "__main__":
-    tao_flow = TAOFlow()
+    tao_flow = TAOFlow(name="tao-flow")
     state = TAOState(query="什么是智能体TAO")
     tao_flow.run(state)

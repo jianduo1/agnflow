@@ -1,10 +1,11 @@
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 import asyncio, time, inspect
 
 from agnflow.core.connection import Connection
 
+StateType = TypeVar("StateType", bound=dict)
 
-class Node(Connection):
+class Node(Connection[StateType]):
     """节点 - 工作流的基本执行单元"""
 
     def __init__(self, name: str = None, exec: Callable = None, aexec: Callable = None, max_retries=1, wait=0):
@@ -21,7 +22,7 @@ class Node(Connection):
     # region 执行流程
 
     async def execute_workflow(
-        self, state: dict, remaining_steps: int = 10, entry_action: str = None, is_async: bool = False
+        self, state: StateType, remaining_steps: int = 10, entry_action: str = None, is_async: bool = False
     ) -> Any:
         """Node 作为单节点工作流，调用自定义或者默认执行器（exec/aexec）
 
@@ -51,7 +52,7 @@ class Node(Connection):
                     else:
                         time.sleep(self.wait)
 
-    def _call_with_params(self, executor: Callable, instance: Any, state: dict) -> Any:
+    def _call_with_params(self, executor: Callable, instance: Any, state: StateType) -> Any:
         """根据函数签名智能调用执行器
 
         步骤：
@@ -95,21 +96,21 @@ class Node(Connection):
     # endregion
 
     # region 默认执行器和错误处理
-    def exec(self, state: dict) -> Any:
+    def exec(self, state: StateType) -> Any:
         """默认同步执行器"""
         print(f"默认同步执行器: {self}, 当前 state: {state}, 返回 exit")
         return "exit"
 
-    async def aexec(self, state: dict) -> Any:
+    async def aexec(self, state: StateType) -> Any:
         """默认异步执行器"""
         print(f"默认异步执行器: {self}, 当前 state: {state}, 返回 exit")
         return "exit"
 
-    def exec_fallback(self, state: dict, exc: Exception) -> Any:
+    def exec_fallback(self, state: StateType, exc: Exception) -> Any:
         """同步执行失败的回调"""
         raise exc
 
-    async def aexec_fallback(self, state: dict, exc: Exception) -> Any:
+    async def aexec_fallback(self, state: StateType, exc: Exception) -> Any:
         """异步执行失败的回调"""
         raise exc
 

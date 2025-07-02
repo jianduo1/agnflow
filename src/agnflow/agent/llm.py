@@ -101,7 +101,7 @@ def llm_json_stream(
     2. 校验通过后，第二阶段才流式输出实际内容。
     支持OpenAI、ChatQwQ等模型。
     """
-    split_token = "---===---"
+    split_token = "~~~~~~"
 
     if mdoel is None:
         raise ValueError("必须指定mdoel参数（OpenAI/ChatQwQ等）")
@@ -192,8 +192,8 @@ if __name__ == "__main__":
         + Msg([{"role": "system", "content": "你是谁"}])
         + Msg([{"role": "assistant", "content": "我是AI"}])
     )
-    msgs += UserMsg("你好2") + SysMsg("你是谁2") + AiMsg("我是AI2")
-    print("消息列表:", msgs)
+    # msgs += UserMsg("你好2") + SysMsg("你是谁2") + AiMsg("我是AI2")
+    print("消息列表:", *msgs)
 
     # from openai import OpenAI
 
@@ -229,7 +229,7 @@ if __name__ == "__main__":
     #     elif chunk["type"] == "error":
     #         print("错误：", chunk["data"])
 
-    from granian import Server
-    app =None
-    server = Server(app, interface="asgi", host="0.0.0.0", port=8000, workers=2)
-    server.start()
+    # from granian import Server
+    # app =None
+    # server = Server(app, interface="asgi", host="0.0.0.0", port=8000, workers=2)
+    # server.start()

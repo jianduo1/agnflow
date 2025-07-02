@@ -1,12 +1,13 @@
-from typing import Any, Dict, Literal
+from typing import Any, Dict, Literal, TypeVar, Generic
 import asyncio
 from pathlib import Path
 import re
 
 from agnflow.utils.code import get_code_line
 
+StateType = TypeVar("StateType", bound=dict)
 
-class Connection:
+class Connection(Generic[StateType]):
     """连接关系（节点与容器）
 
     特性：
@@ -271,20 +272,20 @@ class Connection:
     # endregion
 
     # region 执行流程
-    def run(self, state: dict, max_steps: int = 10, entry_action: str = None) -> Any:
+    def run(self, state: StateType, max_steps: int = 10, entry_action: str = None) -> Any:
         """同步执行工作流的核心逻辑"""
         return asyncio.run(
             self.execute_workflow(state=state, remaining_steps=max_steps, entry_action=entry_action, is_async=False)
         )
 
-    async def arun(self, state: dict, max_steps: int = 10, entry_action: str = None) -> Any:
+    async def arun(self, state: StateType, max_steps: int = 10, entry_action: str = None) -> Any:
         """异步执行工作流的核心逻辑"""
         return await self.execute_workflow(
             state=state, remaining_steps=max_steps, entry_action=entry_action, is_async=True
         )
 
     def execute_workflow(
-        self, state: dict, remaining_steps: int = 10, entry_action: str = None, is_async: bool = False
+        self, state: StateType, remaining_steps: int = 10, entry_action: str = None, is_async: bool = False
     ) -> Any:
         """统一的工作流执行接口，Node 作为单节点工作流"""
         raise NotImplementedError("Node 类不支持 execute_workflow 方法")

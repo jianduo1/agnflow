@@ -105,7 +105,7 @@ class CoTState(TypedDict):
     """最后计划结构"""
 
 
-class COTNode(Node):
+class CoTNode(Node[CoTState]):
     """思维链节点 - ChainOfThought - 实现结构化思维过程管理
 
     链式思维步骤：
@@ -305,11 +305,12 @@ class COTNode(Node):
 
         return self.name
 
-class CoTFlow(Flow):
+
+class CoTFlow(Flow[CoTState]):
     def __init__(self, name: str = None):
-        super().__init__(name)
-        node = COTNode()
-        self[node >> node]
+        super().__init__(name=name)
+        self.cot_node = CoTNode(name="cot-node")
+        self[self.cot_node >> self.cot_node]
 
 
 if __name__ == "__main__":
@@ -319,5 +320,6 @@ if __name__ == "__main__":
     # cot_flow[cot_node >> cot_node]
     # flow.run({"problem": "给出 1 + (2 * 3) + 4 每一步计算结果"})
 
-    flow = CoTFlow()
-    flow.run({"problem": "什么是智能体CoT"}, max_steps=200)
+    flow = CoTFlow(name="cot-flow")
+    state = CoTState(problem="什么是智能体CoT")
+    flow.run(state, max_steps=200)
