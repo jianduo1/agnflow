@@ -52,7 +52,7 @@ a - b - c      # Disconnect symmetrically
 
 ### 🚀 Advanced Flow Control
 
-- Sync/Async Mixed: `n=Node(exec=...aexec=async_func)`
+- Sync/Async Mixed: `n=Node(exec=sync_func, aexec=async_func)`
 - Branching/Looping: `n1 >> [n2, n3] >> n1` (n1 points to n2 and n3, n2 and n3 point back to n1)
 - Swarm Agents: `s=Swarm(); s[n1, n2, n3] >> n4` (n1, n2, n3 are fully connected inside s)
 - Parallel Flow: `pf=ParallelFlow(); pf[n1, n2, n3]` (execute multiple child nodes concurrently)

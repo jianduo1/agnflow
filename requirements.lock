@@ -18,6 +18,8 @@ anyio==4.9.0
     # via starlette
 asttokens==3.0.0
     # via stack-data
+cachetools==6.1.0
+    # via zhipuai
 certifi==2025.6.15
     # via httpcore
     # via httpx
@@ -26,7 +28,7 @@ charset-normalizer==3.4.2
     # via requests
 click==8.2.1
     # via duckduckgo-search
-    # via granian
+    # via uvicorn
 decorator==5.2.1
     # via ipython
 distro==1.9.0
@@ -37,16 +39,16 @@ executing==2.2.0
     # via stack-data
 fastapi==0.115.14
     # via agnflow
-granian==2.4.0
-    # via agnflow
 graphviz==0.21
     # via agnflow
 h11==0.16.0
     # via httpcore
+    # via uvicorn
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
     # via openai
+    # via zhipuai
 idna==3.10
     # via anyio
     # via httpx
@@ -87,11 +89,15 @@ pydantic==2.11.7
     # via agnflow
     # via fastapi
     # via openai
+    # via zhipuai
 pydantic-core==2.33.2
     # via pydantic
+    # via zhipuai
 pygments==2.19.2
     # via ipython
     # via ipython-pygments-lexers
+pyjwt==2.8.0
+    # via zhipuai
 python-dotenv==1.1.0
     # via agnflow
 pyyaml==6.0.2
@@ -127,5 +133,9 @@ typing-inspection==0.4.1
     # via pydantic
 urllib3==2.5.0
     # via requests
+uvicorn==0.35.0
+    # via agnflow
 wcwidth==0.2.13
     # via prompt-toolkit
+zhipuai==2.1.5.20250701
+    # via agnflow

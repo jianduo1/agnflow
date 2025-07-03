@@ -93,14 +93,60 @@ def get_hitl_router(prefix: str = "/hitl", tags: list[str] = ["HumanInTheLoop"])
     return router
 
 
-# ================= 示例代码 =================
+app = FastAPI()
+app.include_router(get_hitl_router())
+
 if __name__ == "__main__":
+
+    import subprocess
+    from pathlib import Path
+
+    # print("\n访问 http://127.0.0.1:8000/docs 进行交互式测试")
+
+    # path = f"{Path(__file__)}"
+    # path = path.removeprefix(f"{Path.cwd()}/")
+    # path = path.removesuffix(".py")
+    # path = path.replace("/", ".")
+
+    # subprocess.check_call(
+    #     [
+    #         "granian",
+    #         "agnflow.agent.hitl.api:app",
+    #         "--workers",
+    #         "2",
+    #         # "--reload",
+    #         # "--reload-paths",
+    #         # f"{Path.cwd()}/agnflow/src",
+    #         # "--reload-tick",
+    #         # "5000",
+    #         # "--working-dir",
+    #         # f"{Path.cwd()}/agnflow",
+    #     ]
+    # )
+    # subprocess.getoutput(
+    #     f"granian "
+    #     # f"{path}:app "
+    #     "agnflow.agent.hitl.api:app "
+    #     # "--host "
+    #     # "'0.0.0.0' "
+    #     # "--port "
+    #     # "8000 "
+    #     "--workers "
+    #     "2 "
+    #     "--reload "
+    #     "--reload-paths "
+    #     f"{Path.cwd()}/agnflow/src "
+    #     # "--working-dir "
+    #     # f"{Path.cwd()}/agnflow "
+    # )
     import uvicorn
 
-    app = FastAPI()
-    app.include_router(get_hitl_router())
-    print("\n访问 http://127.0.0.1:8000/docs 进行交互式测试")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-"""
-"""
+    uvicorn.run(
+        app="agnflow.agent.hitl.api:app",
+        host="0.0.0.0",
+        workers=2,
+        port=8000,
+        reload=True,
+        reload_dirs=["agnflow/src"],
+        reload_delay=1,
+    )

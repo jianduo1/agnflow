@@ -52,11 +52,11 @@ a - b - c      # 对称断开
 
 ### 🚀 高级流程控制
 
-- 同步/异步混合: `n=Node(exec=...aexec=async_func)`
+- 同步/异步混合: `n=Node(exec=sync_func, aexec=async_func)`
 - 分支/循环: `n1 >> [n2, n3] >> n1`（n1指向n2和n3，n2和n3指向n1）
 - 蜂群智能体: `s=Swarm(); s[n1, n2, n3] >> n4`（s内部的n1，n2，n3全互连）
 - 并行工作流: `pf=ParallelFlow(); pf[n1, n2, n3]`（并发执行多个子节点）
-- 人工审核: CLI/API 介入
+- 人工审核: CLI/API 介入 `hitl`
 
 
 ## 📦 快速开始

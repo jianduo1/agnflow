@@ -19,7 +19,7 @@ class Node(Connection[StateType]):
     def __getitem__(self, key):
         raise NotImplementedError("Node 类不支持 __getitem__ 方法")
 
-    # region 执行流程
+    # region 执行流程 execute_workflow -> exec/aexec -> exec_fallback/aexec_fallback
 
     async def execute_workflow(
         self, state: StateType, remaining_steps: int = 10, entry_action: str = None, is_async: bool = False

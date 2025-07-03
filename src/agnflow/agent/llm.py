@@ -56,15 +56,18 @@ def call_llm(
     res = completion.choices[0].message.content
 
     # 根据输出格式返回结果
-    if output_format == "text":
-        return res
-    if output_format == "yaml":
-        res = res.strip().removeprefix("```yaml").removesuffix("```").strip()
-        return yaml.safe_load(res)
-    elif output_format == "json":
-        res = res.strip().removeprefix("```json").removesuffix("```").strip()
-        return json.loads(res)
-    raise ValueError(f"不支持的输出格式: {output_format}")
+    try:
+        if output_format == "text":
+            return res
+        if output_format == "yaml":
+            res = res.strip().removeprefix("```yaml").removesuffix("```").strip()
+            return yaml.safe_load(res)
+        elif output_format == "json":
+            res = res.strip().removeprefix("```json").removesuffix("```").strip()
+            return json.loads(res)
+    except Exception as e:
+        print("ERROR: ",res)
+        raise ValueError(f"输出格式化失败: {e}")
 
 
 def stream_llm(prompt):
@@ -147,8 +150,7 @@ def llm_json_stream(
         return
     elif isinstance(mdoel, ChatQwQ):
         prompt = f"请先以JSON格式输出如下schema的内容：{json.dumps(json_schema, ensure_ascii=False)}，然后输出正文内容。两部分之间用'---'分割。"
-        chat_input = message if isinstance(message, str) else json.dumps(message, ensure_ascii=False)
-        full_prompt = prompt + "\n" + chat_input
+        full_prompt = prompt + "\n" + messages[-1]["content"]
         stream = mdoel.stream(full_prompt)
         buffer = ""
         json_block = ""
@@ -228,8 +230,3 @@ if __name__ == "__main__":
     #         print("正文流：", chunk["data"], end="", flush=True)
     #     elif chunk["type"] == "error":
     #         print("错误：", chunk["data"])
-
-    # from granian import Server
-    # app =None
-    # server = Server(app, interface="asgi", host="0.0.0.0", port=8000, workers=2)
-    # server.start()

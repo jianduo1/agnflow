@@ -1,7 +1,7 @@
 """
-思维链节点实现 - 实现结构化思维过程管理
+思考链节点实现 - 实现结构化思考过程管理
 
-本模块支持结构化计划管理、思维评估和渐进式问题解决。
+本模块支持结构化计划管理、思考评估和渐进式问题解决。
 """
 
 from typing import TypedDict
@@ -106,24 +106,24 @@ class CoTState(TypedDict):
 
 
 class CoTNode(Node[CoTState]):
-    """思维链节点 - ChainOfThought - 实现结构化思维过程管理
+    """思考链节点 - ChainOfThought - 实现结构化思考过程管理
 
-    链式思维步骤：
+    链式思考步骤：
 
-    1. 评估之前的思维步骤
+    1. 评估之前的思考步骤
     2. 执行计划中的待处理步骤
     3. 维护和更新结构化计划
     4. 处理错误和验证需求
     """
 
     def exec(self, state: CoTState) -> str:
-        # 准备阶段：整理思维历史和计划状态
+        # 准备阶段：整理思考历史和计划状态
         problem = state.get("problem", "")
         thoughts = state.get("thoughts", [])
         current_thought_number = state.get("current_thought_number", 0) + 1
         state["current_thought_number"] = current_thought_number
 
-        # 格式化之前的思维并提取最后的计划结构
+        # 格式化之前的思考并提取最后的计划结构
         thoughts_text = ""
         last_plan_structure = None
         if thoughts:
@@ -156,17 +156,17 @@ class CoTNode(Node[CoTState]):
         # 使用特定辅助函数为提示词上下文格式化最后的计划结构
         last_plan_text = format_plan_for_prompt(last_plan_structure) if last_plan_structure else "# 没有之前的计划"
 
-        # 执行阶段：生成下一个思维步骤
+        # 执行阶段：生成下一个思考步骤
         # --- 构建提示词 ---
         # 为字典结构更新的指令
         instruction_base = dedent(
             f"""
-            你的任务是生成下一个思维步骤（编号为 {current_thought_number}）。
+            你的任务是生成下一个思考步骤（编号为 {current_thought_number}）。
 
             请遵循以下要求：
 
-            1.  **评估上一步思维：** 如果这不是第一次思考，请在 `current_thinking` 的开头对思维 {current_thought_number - 1} 进行简明评估。
-                评估格式示例："对思维 {current_thought_number - 1} 的评估：[✅正确/⚠️有小问题/❌重大错误 - 说明理由]"。如发现错误，请优先处理。
+            1.  **评估上一步思考：** 如果这不是第一次思考，请在 `current_thinking` 的开头对思考 {current_thought_number - 1} 进行简明评估。
+                评估格式示例："对思考 {current_thought_number - 1} 的评估：[✅正确/⚠️有小问题/❌重大错误 - 说明理由]"。如发现错误，请优先处理。
             2.  **执行计划步骤：** 执行计划中第一个 `status: Pending` 的步骤，并在 `current_thinking` 中详细说明你的推理过程。
             3.  **维护和更新计划结构：** 生成最新的 `planning` 列表。每一项为字典，需包含：`description`（字符串）、`status`（"Pending"、"Done"、"Verification Needed"），可选 `result`（已完成时的简要总结）或 `mark`（需验证时的原因说明）。如有子步骤，使用 `sub_steps` 键，其值为同结构的字典列表。
             4.  **更新当前步骤状态：** 对已执行的步骤，将其 `status` 设为 "Done"，并补充 `result` 简要总结。如评估需验证，则将 `status` 设为 "Verification Needed"，并添加 `mark` 说明。
@@ -187,36 +187,36 @@ class CoTNode(Node[CoTState]):
                 **上一步计划（简化视图）：**
                 {last_plan_text}
 
-                请以评估思维 {current_thought_number - 1} 开始 `current_thinking`。然后，执行第一个 `status: Pending` 的步骤。更新计划结构（字典列表），体现评估、执行和细化等变化。
+                请以评估思考 {current_thought_number - 1} 开始 `current_thinking`。然后，执行第一个 `status: Pending` 的步骤。更新计划结构（字典列表），体现评估、执行和细化等变化。
             """
         )
 
         # 为字典结构更新的输出格式示例
         instruction_format = dedent(
             """
-            仅将你的回复格式化为用 ```yaml ... ``` 包裹的 YAML 结构：
+            请仅将你的回复以 ```yaml ... ``` 包裹的 YAML 格式输出：
             ```yaml
             current_thinking: |
-              [对思维 N 的评估：[评估结果] ...（如适用）]
+              [对思考 N 的评估：[评估结果] ...（如适用）]
               [当前步骤的思考内容...]
             planning:
               # 字典列表（键包括: description, status, 可选[result, mark, sub_steps]）
               - description: "步骤 1"
                 status: "Done"
                 result: "简要结果总结"
-              - description: "步骤 2 复杂任务" # 现在被细分
-                status: "Pending" # 父步骤保持 Pending
+              - description: "步骤 2 复杂任务" # 复杂任务需要细分
+                status: "Pending" # 父步骤保持 Pending 状态
                 sub_steps:
                   - description: "子任务 2a"
                     status: "Pending"
                   - description: "子任务 2b"
                     status: "Verification Needed"
-                    mark: "思维 X 的结果可能有问题"
+                    mark: "思考 X 的结果可能有问题"
               - description: "步骤 3"
                 status: "Pending"
               - description: "结论"
                 status: "Pending"
-            next_thought_needed: true # 仅在执行"结论"步骤时设为 false。
+            next_thought_needed: true # 只有当执行到 "结论" 步骤时，将 next_thought_needed 设为 false
             ```
         """
         )
@@ -242,7 +242,7 @@ class CoTNode(Node[CoTState]):
         response = call_llm(UserMsg(prompt))
 
         # 简单 YAML 提取
-        yaml_str = response.split("```yaml")[1].split("```")[0].strip()
+        yaml_str = response.removeprefix("```yaml\n").removesuffix("```").strip()
         thought_data = yaml.safe_load(yaml_str)  # 可能抛出 YAMLError
 
         # --- 验证（使用 assert） ---
@@ -254,11 +254,11 @@ class CoTNode(Node[CoTState]):
         # 可选：如果需要，添加列表项为字典的更深层验证
         # --- 结束验证 ---
 
-        # 添加思维编号
+        # 添加思考编号
         thought_data["thought_number"] = current_thought_number
 
-        # 后处理阶段：更新思维历史并决定下一步
-        # 将新思维添加到列表
+        # 后处理阶段：更新思考历史并决定下一步
+        # 将新思考添加到列表
         state.setdefault("thoughts", []).append(thought_data)
 
         # 使用更新的递归辅助函数提取计划用于打印
@@ -286,7 +286,7 @@ class CoTNode(Node[CoTState]):
 
         # 使用 is_conclusion 标志或 next_thought_needed 标志进行终止
         if not thought_data.get("next_thought_needed", True):  # 主要终止信号
-            state["solution"] = dedented_thinking  # 解决方案是最后步骤的思维内容
+            state["solution"] = dedented_thinking  # 解决方案是最后步骤的思考内容
             print(f"\n思考 {thought_num} (结论):")
             print(f"{indent(dedented_thinking, '  ')}")
             print("\n最终计划状态:")
@@ -296,7 +296,7 @@ class CoTNode(Node[CoTState]):
             print("======================\n")
             return "exit"
 
-        # 否则，继续链式思维
+        # 否则，继续链式思考
         print(f"\n思考 {thought_num}:")
         print(f"{indent(dedented_thinking, '  ')}")
         print("\n当前计划状态:")

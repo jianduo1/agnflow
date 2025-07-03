@@ -25,6 +25,8 @@ backrefs==5.9
     # via mkdocs-material
 black==25.1.0
 build==1.2.2.post1
+cachetools==6.1.0
+    # via zhipuai
 certifi==2025.6.15
     # via httpcore
     # via httpx
@@ -36,6 +38,7 @@ click==8.2.1
     # via duckduckgo-search
     # via granian
     # via mkdocs
+    # via uvicorn
 colorama==0.4.6
     # via mkdocs-material
 csscompressor==0.9.5
@@ -66,12 +69,12 @@ gitdb==4.0.12
     # via gitpython
 gitpython==3.1.44
     # via mkdocs-git-revision-date-localized-plugin
-granian==2.4.0
-    # via agnflow
+granian==2.4.1
 graphviz==0.21
     # via agnflow
 h11==0.16.0
     # via httpcore
+    # via uvicorn
 hf-xet==1.1.5
     # via huggingface-hub
 htmlmin2==0.1.13
@@ -81,6 +84,7 @@ httpcore==1.0.9
 httpx==0.28.1
     # via langsmith
     # via openai
+    # via zhipuai
 huggingface-hub==0.33.1
     # via sentence-transformers
     # via tokenizers
@@ -227,8 +231,10 @@ pydantic==2.11.7
     # via langchain-core
     # via langsmith
     # via openai
+    # via zhipuai
 pydantic-core==2.33.2
     # via pydantic
+    # via zhipuai
 pyflakes==3.4.0
     # via flake8
 pygments==2.19.1
@@ -238,6 +244,8 @@ pygments==2.19.1
     # via pytest
     # via readme-renderer
     # via rich
+pyjwt==2.8.0
+    # via zhipuai
 pymdown-extensions==10.16
     # via mkdocs-material
 pyproject-hooks==1.2.0
@@ -343,9 +351,13 @@ typing-inspection==0.4.1
 urllib3==2.5.0
     # via requests
     # via twine
+uvicorn==0.35.0
+    # via agnflow
 watchdog==6.0.0
     # via mkdocs
 wcwidth==0.2.13
     # via prompt-toolkit
+zhipuai==2.1.5.20250701
+    # via agnflow
 zstandard==0.23.0
     # via langsmith
