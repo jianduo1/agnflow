@@ -5,12 +5,12 @@
 """
 
 from typing import TypedDict
-from textwrap import dedent, indent
 import yaml
 
 from agnflow.core.node import Node
 from agnflow.core.flow import Flow
 from agnflow.agent.llm import call_llm, UserMsg
+from agnflow.utils.log import pprint
 
 
 status_map = {"Done": "✅", "Pending": "⏳", "Verification Needed": "❌"}
@@ -106,7 +106,7 @@ class CoTState(TypedDict):
 
 
 class CoTNode(Node[CoTState]):
-    """思考链节点 - ChainOfThought - 实现结构化思考过程管理
+    """思考链节点 - ChainOfThought
 
     链式思考步骤：
 
@@ -130,8 +130,8 @@ class CoTNode(Node[CoTState]):
             thoughts_text_list = []
             for i, thought in enumerate(thoughts):
                 thought_block = f"思考 {thought.get('thought_number', i+1)}:\n"
-                thinking = dedent(thought.get("current_thinking", "N/A")).strip()
-                thought_block += f"  思考内容:\n{indent(thinking, '    ')}\n"
+                thinking = thought.get("current_thinking", "N/A")
+                thought_block += f"  思考内容:\n{thinking}\n"
 
                 plan_list = thought.get("planning", [])
                 # 使用递归辅助函数进行显示格式化
@@ -159,84 +159,74 @@ class CoTNode(Node[CoTState]):
         # 执行阶段：生成下一个思考步骤
         # --- 构建提示词 ---
         # 为字典结构更新的指令
-        instruction_base = dedent(
-            f"""
-            你的任务是生成下一个思考步骤（编号为 {current_thought_number}）。
+        instruction_base = f"""
+你的任务是生成下一个思考步骤（编号为 {current_thought_number}）。请遵循以下要求：
 
-            请遵循以下要求：
-
-            1.  **评估上一步思考：** 如果这不是第一次思考，请在 `current_thinking` 的开头对思考 {current_thought_number - 1} 进行简明评估。
-                评估格式示例："对思考 {current_thought_number - 1} 的评估：[✅正确/⚠️有小问题/❌重大错误 - 说明理由]"。如发现错误，请优先处理。
-            2.  **执行计划步骤：** 执行计划中第一个 `status: Pending` 的步骤，并在 `current_thinking` 中详细说明你的推理过程。
-            3.  **维护和更新计划结构：** 生成最新的 `planning` 列表。每一项为字典，需包含：`description`（字符串）、`status`（"Pending"、"Done"、"Verification Needed"），可选 `result`（已完成时的简要总结）或 `mark`（需验证时的原因说明）。如有子步骤，使用 `sub_steps` 键，其值为同结构的字典列表。
-            4.  **更新当前步骤状态：** 对已执行的步骤，将其 `status` 设为 "Done"，并补充 `result` 简要总结。如评估需验证，则将 `status` 设为 "Verification Needed"，并添加 `mark` 说明。
-            5.  **细化复杂步骤：** 若某个 "Pending" 步骤较为复杂，请为其添加 `sub_steps`，将其细分为多个新的子步骤（均为 "Pending"）。父步骤在所有子步骤完成前保持 "Pending"。
-            6.  **根据评估调整计划：** 如评估发现问题，请合理修改计划（如更改状态、添加修正步骤等）。
-            7.  **推进至结论：** 确保计划最终包含形如 `{{'description': "Conclusion", 'status': "Pending"}}` 的结论步骤。
-            8.  **终止条件：** 仅当执行 `description: "Conclusion"` 步骤时，将 `next_thought_needed` 设为 `false`，其余情况均为 `true`。
-        """
-        )
+1.  **评估上一步思考：** 如果这不是第一次思考，请在 `current_thinking` 的开头对思考 {current_thought_number - 1} 进行简明评估。
+    评估格式示例："对思考 {current_thought_number - 1} 的评估：[✅正确/⚠️有小问题/❌重大错误 - 说明理由]"。如发现错误，请优先处理。
+2.  **执行计划步骤：** 执行计划中第一个 `status: Pending` 的步骤，并在 `current_thinking` 中详细说明你的推理过程。
+3.  **维护和更新计划结构：** 生成最新的 `planning` 列表。每一项为字典，需包含：`description`（字符串）、`status`（"Pending"、"Done"、"Verification Needed"），可选 `result`（已完成时的简要总结）或 `mark`（需验证时的原因说明）。如有子步骤，使用 `sub_steps` 键，其值为同结构的字典列表。
+4.  **更新当前步骤状态：** 对已执行的步骤，将其 `status` 设为 "Done"，并补充 `result` 简要总结。如评估需验证，则将 `status` 设为 "Verification Needed"，并添加 `mark` 说明。
+5.  **细化复杂步骤：** 若某个 "Pending" 步骤较为复杂，请为其添加 `sub_steps`，将其细分为多个新的子步骤（均为 "Pending"）。父步骤在所有子步骤完成前保持 "Pending"。
+6.  **根据评估调整计划：** 如评估发现问题，请合理修改计划（如更改状态、添加修正步骤等）。
+7.  **推进至结论：** 确保计划最终包含形如 `{{'description': "Conclusion", 'status': "Pending"}}` 的结论步骤。
+8.  **终止条件：** 仅当执行 `description: "Conclusion"` 步骤时，将 `next_thought_needed` 设为 `false`，其余情况均为 `true`。
+"""
 
         # 上下文基本保持不变
-        instruction_context = dedent(
-            """
-            **这是第一次思考：** 请创建一个初始计划，格式为字典列表（每项包含 description, status 键）。如有需要，可通过 `sub_steps` 键添加子步骤。然后，在 `current_thinking` 中执行第一个步骤，并给出更新后的计划（将第1步的 `status` 标记为 "Done"，并补充 `result` 简要总结）。
-        """
-            if not thoughts
-            else f"""
+        instruction_context = f"""
+**这是第一次思考：** 请创建一个初始计划，格式为字典列表（每项包含 description, status 键）。如有需要，可通过 `sub_steps` 键添加子步骤。然后，在 `current_thinking` 中执行第一个步骤，并给出更新后的计划（将第1步的 `status` 标记为 "Done"，并补充 `result` 简要总结）。
+"""
+        if not thoughts:
+            instruction_context = f"""
                 **上一步计划（简化视图）：**
                 {last_plan_text}
 
                 请以评估思考 {current_thought_number - 1} 开始 `current_thinking`。然后，执行第一个 `status: Pending` 的步骤。更新计划结构（字典列表），体现评估、执行和细化等变化。
             """
-        )
 
         # 为字典结构更新的输出格式示例
-        instruction_format = dedent(
-            """
-            请仅将你的回复以 ```yaml ... ``` 包裹的 YAML 格式输出：
-            ```yaml
-            current_thinking: |
-              [对思考 N 的评估：[评估结果] ...（如适用）]
-              [当前步骤的思考内容...]
-            planning:
-              # 字典列表（键包括: description, status, 可选[result, mark, sub_steps]）
-              - description: "步骤 1"
-                status: "Done"
-                result: "简要结果总结"
-              - description: "步骤 2 复杂任务" # 复杂任务需要细分
-                status: "Pending" # 父步骤保持 Pending 状态
-                sub_steps:
-                  - description: "子任务 2a"
-                    status: "Pending"
-                  - description: "子任务 2b"
-                    status: "Verification Needed"
-                    mark: "思考 X 的结果可能有问题"
-              - description: "步骤 3"
-                status: "Pending"
-              - description: "结论"
-                status: "Pending"
-            next_thought_needed: true # 只有当执行到 "结论" 步骤时，将 next_thought_needed 设为 false
-            ```
-        """
-        )
+        instruction_format = """
+请仅将你的回复以 ```yaml ... ``` 包裹的 YAML 格式输出：
+```yaml
+current_thinking: |
+    [对思考 N 的评估：[评估结果] ...（如适用）]
+    [当前步骤的思考内容...]
+planning:
+    # 字典列表（键包括: description, status, 可选[result, mark, sub_steps]）
+    - description: "步骤 1"
+    status: "Done"
+    result: "简要结果总结"
+    - description: "步骤 2 复杂任务" # 复杂任务需要细分
+    status: "Pending" # 父步骤保持 Pending 状态
+    sub_steps:
+        - description: "子任务 2a"
+        status: "Pending"
+        - description: "子任务 2b"
+        status: "Verification Needed"
+        mark: "思考 X 的结果可能有问题"
+    - description: "步骤 3"
+    status: "Pending"
+    - description: "结论"
+    status: "Pending"
+next_thought_needed: true # 只有当执行到 "结论" 步骤时，将 next_thought_needed 设为 false
+```
+"""
 
         # 组合提示词部分
-        prompt = dedent(
-            f"""
-            你是一名严谨的 AI 助手，正通过结构化计划逐步解决复杂问题。
-            你会批判性地评估前一步，必要时用子步骤细化计划，并合理处理错误。请严格使用指定的 YAML 字典结构输出计划。
+        prompt = f"""
+    你是一名严谨的 AI 助手，正通过结构化计划逐步解决复杂问题。
+    你会批判性地评估前一步，必要时用子步骤细化计划，并合理处理错误。请严格使用指定的 YAML 字典结构输出计划。
 
-            问题：{problem}
+    问题：{problem}
 
-            之前的思考：
-            {thoughts_text}
-            --------------------
-            {instruction_base}
-            {instruction_context}
-            {instruction_format}
-        """
-        )
+    之前的思考：
+    {thoughts_text}
+    --------------------
+    {instruction_base}
+    {instruction_context}
+    {instruction_format}
+"""
         # --- 结束提示词构建 ---
 
         response = call_llm(UserMsg(prompt))
@@ -267,7 +257,6 @@ class CoTNode(Node[CoTState]):
 
         thought_num = thought_data.get("thought_number", "N/A")
         current_thinking = thought_data.get("current_thinking", "错误: Missing thinking content.")
-        dedented_thinking = dedent(current_thinking).strip()
 
         # 根据描述确定这是否是结论步骤
         is_conclusion = False
@@ -286,22 +275,22 @@ class CoTNode(Node[CoTState]):
 
         # 使用 is_conclusion 标志或 next_thought_needed 标志进行终止
         if not thought_data.get("next_thought_needed", True):  # 主要终止信号
-            state["solution"] = dedented_thinking  # 解决方案是最后步骤的思考内容
-            print(f"\n思考 {thought_num} (结论):")
-            print(f"{indent(dedented_thinking, '  ')}")
-            print("\n最终计划状态:")
-            print(indent(plan_str_formatted, "  "))
-            print("\n=== 最终解决方案 ===")
-            print(dedented_thinking)
-            print("======================\n")
+            state["solution"] = current_thinking  # 解决方案是最后步骤的思考内容
+            pprint(f"\n思考 {thought_num} (结论):")
+            pprint(current_thinking)
+            pprint("\n最终计划状态:")
+            pprint(plan_str_formatted)
+            pprint("\n=== 最终解决方案 ===")
+            pprint(current_thinking)
+            pprint("======================\n")
             return "exit"
 
         # 否则，继续链式思考
-        print(f"\n思考 {thought_num}:")
-        print(f"{indent(dedented_thinking, '  ')}")
-        print("\n当前计划状态:")
-        print(indent(plan_str_formatted, "  "))
-        print("-" * 50)
+        pprint(f"\n思考 {thought_num}:")
+        pprint(current_thinking)
+        pprint("\n当前计划状态:")
+        pprint(plan_str_formatted)
+        pprint("-" * 50)
 
         return self.name
 
