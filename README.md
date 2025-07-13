@@ -45,6 +45,17 @@ state = {"data": "hello"}
 Flow(n1 >> n2).run(state)  # Output: {"data": "hello", 'msg': 'world'}
 ```
 
+### 🧠 **Deep Thinking & Reasoning** ⭐️ **New Feature**
+
+<div align="center">
+  <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/static_page/thinking.en.png" alt="Deep Thinking Process" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/static_page/code.en.png" alt="Code Generation" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  </div>
+  <br>
+  <em>🧠 Structured reasoning with step-by-step thinking process | 💻 Intelligent code generation with detailed explanations</em>
+</div>
+
 ### 🎨 **Automatic Flow Visualization**
 
 ```python
@@ -139,6 +150,17 @@ n2 = Node("world", exec=print)
 state = {"data": "hello"}
 Flow(n1 >> n2).run(state)  # 输出: {"data": "hello", 'msg': 'world'}
 ```
+
+### 🧠 **深度思考与推理** ⭐️ **新功能**
+
+<div align="center">
+  <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/static_page/thinking.zh.png" alt="深度思考过程" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/static_page/code.zh.png" alt="代码生成" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+  </div>
+  <br>
+  <em>🧠 结构化推理，每一步都有清晰的思考过程 | 💻 智能代码生成，提供详细解释</em>
+</div>
 
 ### 🎨 **自动可视化流程图**
 
