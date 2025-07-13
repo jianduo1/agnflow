@@ -2,10 +2,12 @@
   <h1>🚀 AgnFlow</h1>
   
   <strong>Efficient lightweight Python Agent Workflow Engine</strong>
+  <br>
   <strong>高效轻量的 Python 智能体工作流引擎</strong>
   <br>
   
   <em>Support Sync/Async Nodes, Branching Loops, Visual Flowcharts | Build Agent Task Flows Fast</em>
+  <br>
   <em>支持同步/异步节点、分支循环、可视化流程图 | 快速搭建 Agent 任务流</em>
   <br>
   
@@ -22,6 +24,7 @@
   <br>
   
   <em>💻 Code → 📊 Log → 🎨 Flowchart - Complete development agent workflow visualization in minutes</em>
+  <br>
   <em>💻 代码 → 📊 日志 → 🎨 流程图 - 快速开发复杂的智能体工作流可视化</em>
   <br>
 </div>
@@ -248,8 +251,12 @@ flow.run()  # 输出: {'message': 'Hello World'}
 ---
 
 <div align="center">
+  <strong>If you find this project helpful, please give it a ⭐️ Star!</strong>
+  <br>
   <strong>如果这个项目对你有帮助，请给它一个 ⭐️ Star！</strong>
   <br>
+  <em>Your support is my motivation to keep improving 💪</em>
+  <br><br>
   <em>你的支持是我持续改进的动力 💪</em>
   <br><br>
 </div>
