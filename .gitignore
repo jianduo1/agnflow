@@ -68,3 +68,7 @@ logs/
 *.tmp
 *.temp
 .cursorrules
+
+# UV
+.uv/
+uv.lock
