@@ -1,4 +1,3 @@
-import importlib.resources
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -7,7 +6,7 @@ import uvicorn
 
 from agnflow.chatbot.routes import router
 from agnflow.chatbot.websocket import websocket_endpoint
-
+from agnflow.chatbot.config import assets_path
 
 class Server:
     """Chatbot Server"""
@@ -17,8 +16,7 @@ class Server:
         self.app = FastAPI(lifespan=self.lifespan)
 
         # 添加静态文件
-        self.assets_path = importlib.resources.files("agnflow") / "assets"
-        self.app.mount("/assets", StaticFiles(directory=str(self.assets_path)), name="assets")
+        self.app.mount("/assets", StaticFiles(directory=str(assets_path)), name="assets")
 
         # 添加CORS中间件
         self.app.add_middleware(
@@ -48,6 +46,6 @@ class Server:
 
 if __name__ == "__main__":
     server = Server()
-    server.run()
     print("Server started: http://localhost:8000/en")
     print("Server started: http://localhost:8000/zh")
+    server.run()

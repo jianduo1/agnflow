@@ -2,20 +2,21 @@ from fastapi import APIRouter
 from fastapi.responses import FileResponse, JSONResponse
 
 from agnflow.chatbot.chatbot_db import chat_db
+from agnflow.chatbot.config import assets_path
 
 router = APIRouter()
 
 # --------- 聊天界面 ---------
 @router.get("/zh")
-async def get_chat_interface_zh(assets_path):
+async def get_chat_interface_zh():
     return FileResponse(assets_path / "index_zh.html")
 
 @router.get("/en")
-async def get_chat_interface_en(assets_path):
+async def get_chat_interface_en():
     return FileResponse(assets_path / "index_en.html")
 
 
-# --------- 聊天记录 ---------  
+# --------- 聊天记录 ---------
 @router.get("/api/conversations")
 async def get_conversations():
     rows = await chat_db.get_conversations()
