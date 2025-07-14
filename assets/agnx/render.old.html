@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能体产品卡片展示</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 15px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      color: white;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0.9;
+      font-weight: 300;
+      line-height: 1.4;
+    }
+
+    .cards-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+      padding: 15px 20px 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #3498db, #1a5276);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .card-icon i {
+      font-size: 24px;
+      color: white;
+    }
+
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #2c3e50;
+    }
+
+    .card-subtitle {
+      color: #7f8c8d;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .card-content {
+      padding: 0 20px 15px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .features-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+    }
+
+    .features-title i {
+      margin-right: 8px;
+      color: #3498db;
+    }
+
+    .features {
+      list-style-type: none;
+      margin-bottom: 15px;
+      flex-grow: 1;
+    }
+
+    .features li {
+      padding: 4px 0;
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.3;
+      font-size: 0.8rem;
+    }
+
+    .features li:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #3498db;
+      font-size: 1.2rem;
+      top: 1px;
+    }
+
+    .card-footer {
+      background: #f8f9fa;
+      padding: 12px 20px;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tech-tag {
+      background: #e3f2fd;
+      color: #1976d2;
+      font-size: 0.65rem;
+      padding: 3px 8px;
+      border-radius: 15px;
+      font-weight: 500;
+    }
+
+    /* Card color variations */
+    .card:nth-child(1) .card-icon {
+      background: linear-gradient(135deg, #3498db, #1a5276);
+    }
+
+    .card:nth-child(2) .card-icon {
+      background: linear-gradient(135deg, #9b59b6, #6c3483);
+    }
+
+    .card:nth-child(3) .card-icon {
+      background: linear-gradient(135deg, #2ecc71, #1e8449);
+    }
+
+    .card:nth-child(4) .card-icon {
+      background: linear-gradient(135deg, #e74c3c, #922b21);
+    }
+
+    .card:nth-child(1) .features li:before {
+      color: #3498db;
+    }
+
+    .card:nth-child(2) .features li:before {
+      color: #9b59b6;
+    }
+
+    .card:nth-child(3) .features li:before {
+      color: #2ecc71;
+    }
+
+    .card:nth-child(4) .features li:before {
+      color: #e74c3c;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .cards-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+      h1 {
+        font-size: 1.3rem;
+      }
+      .card {
+        font-size: 0.9rem;
+      }
+      .card-title {
+        font-size: 1.1rem;
+      }
+      .card-subtitle {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>智能体产品生态系统</h1>
+      <p class="subtitle">AgnFlow、AgnChat、AgnAuto、AgnTest四大产品共同构建了完整的智能体开发生态系统，覆盖工作流、人机交互、自动化测试等关键领域</p>
+    </header>
+
+    <div class="cards-container">
+      <!-- AgnFlow Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <h2 class="card-title">AgnFlow</h2>
+          <p class="card-subtitle">智能体工作流基础框架，快速开发复杂智能体工作流</p>
+        </div>
+        <div class="card-content">
+          <h3 class="features-title"><i class="fas fa-list"></i>核心特性</h3>
+          <ul class="features">
+            <li>智谱免费API集成</li>
+            <li>多智能体通信协议：a2a, mcp</li>
+            <li>函数调用路由机制</li>
+            <li>支持RabbitMQ/Kafka消息队列</li>
+            <li>JSONRPC/HTTP/SSE协议支持</li>
+            <li>FastAPI集成</li>
+            <li>MediaCrawler集成</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <div class="tech-tags">
+            <span class="tech-tag">FastAPI</span>
+            <span class="tech-tag">RabbitMQ</span>
+            <span class="tech-tag">JSONRPC</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AgnChat Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <h2 class="card-title">AgnChat</h2>
+          <p class="card-subtitle">智能体聊天WebUI应用，支持多模态交互与动态代码生成</p>
+        </div>
+        <div class="card-content">
+          <h3 class="features-title"><i class="fas fa-list"></i>核心特性</h3>
+          <ul class="features">
+            <li>多模态交互支持（文本、语音、图像）</li>
+            <li>智谱AI深度集成</li>
+            <li>人机交互工作流：复述-解析-编辑-执行</li>
+            <li>XML指令解析与确认机制</li>
+            <li>动态执行生成代码（AIPY）</li>
+            <li>智能体进化（OpenEvolve）</li>
+            <li>分布式部署架构</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <div class="tech-tags">
+            <span class="tech-tag">多模态</span>
+            <span class="tech-tag">XML解析</span>
+            <span class="tech-tag">分布式</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AgnAuto Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <h2 class="card-title">AgnAuto</h2>
+          <p class="card-subtitle">自动化测试智能体引擎，实现全栈自动化测试能力</p>
+        </div>
+        <div class="card-content">
+          <h3 class="features-title"><i class="fas fa-list"></i>核心组件</h3>
+          <ul class="features">
+            <li>API测试智能体</li>
+            <li>GUI自动化测试引擎</li>
+            <li>性能测试模块（PERF）</li>
+            <li>流量录制与分析</li>
+            <li>智能测试用例生成</li>
+            <li>跨平台测试支持</li>
+            <li>自愈式测试执行</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <div class="tech-tags">
+            <span class="tech-tag">自动化</span>
+            <span class="tech-tag">API测试</span>
+            <span class="tech-tag">GUI测试</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- AgnTest Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="fas fa-vial"></i>
+          </div>
+          <h2 class="card-title">AgnTest</h2>
+          <p class="card-subtitle">自动化测试智能体WebUI系统，全流程测试管理</p>
+        </div>
+        <div class="card-content">
+          <h3 class="features-title"><i class="fas fa-list"></i>核心模块</h3>
+          <ul class="features">
+            <li>项目管理：组织测试资源</li>
+            <li>场景管理：构建测试场景</li>
+            <li>用例管理：创建维护测试用例</li>
+            <li>缺陷跟踪：问题全生命周期管理</li>
+            <li>报告中心：可视化测试报告</li>
+            <li>任务调度：自动化测试执行</li>
+            <li>智能分析：测试数据洞察</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <div class="tech-tags">
+            <span class="tech-tag">测试管理</span>
+            <span class="tech-tag">缺陷跟踪</span>
+            <span class="tech-tag">报告分析</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

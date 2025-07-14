@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能体产品卡片展示</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 15px;
+            color: #333;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            font-family: 'Montserrat', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(90deg, #03001e 0%, #7303c0 40%, #ec38bc 80%, #fdeff9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 4px 16px rgba(63,94,251,0.18), 0 2px 8px rgba(252,70,107,0.15);
+        }
+        
+        @keyframes gradient-move {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.95;
+            font-weight: 700;
+            line-height: 1.4;
+            background: linear-gradient(90deg, #ADA996 0%, #F2F2F2 33%, #DBDBDB 66%, #EAEAEA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+        
+        .agnx-link {
+            color: #5b5b7a;
+            text-decoration: underline;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .agnx-link:hover {
+            color: #7303c0;
+            text-decoration: underline;
+        }
+        
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                0 4px 16px rgba(0, 0, 0, 0.15),
+                0 2px 8px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.05) 0%,
+                rgba(255, 255, 255, 0.02) 50%,
+                rgba(255, 255, 255, 0.05) 100%
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.03) 50%,
+                transparent 70%
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .card:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.3),
+                0 12px 24px rgba(0, 0, 0, 0.2),
+                0 6px 12px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+        
+        .card-header {
+            padding: 15px 20px 10px;
+            position: relative;
+            z-index: 1;
+        }
+        /* 云朵渐变圆 */
+        .card-cloud {
+            display: none;
+        }
+        .card-gradient-corner {
+            display: none;
+        }
+        .card-cloud-svg {
+            width: 180px;
+            height: 90px;
+            display: block;
+        }
+        .cloud-gradient {
+            animation: cloud-move 6s linear infinite alternate;
+        }
+        @keyframes cloud-move {
+            0% { stop-color: #8E2DE2; }
+            25% { stop-color: #4A00E0; }
+            50% { stop-color: #009FFF; }
+            75% { stop-color: #ec2F4B; }
+            100% { stop-color: #8E2DE2; }
+        }
+        .cloud-circle {
+            border-radius: 50%;
+            position: absolute;
+            opacity: 0.85;
+            /* 默认无模糊，部分椭圆有轻微模糊 */
+            filter: none;
+        }
+        .card:nth-child(1) .cloud-circle-1 {
+            width: 90px; height: 54px;
+            left: 40px; top: 18px;
+            opacity: 0.85;
+            background: linear-gradient(120deg, #8E2DE2 0%, #4A00E0 100%);
+            filter: blur(2px);
+        }
+        .card:nth-child(1) .cloud-circle-2 {
+            width: 60px; height: 38px;
+            left: 100px; top: 8px;
+            opacity: 0.7;
+            background: linear-gradient(90deg, #009FFF 0%, #ec2F4B 100%);
+            filter: none;
+        }
+        .card:nth-child(1) .cloud-circle-3 {
+            width: 48px; height: 32px;
+            left: 80px; top: 38px;
+            opacity: 0.6;
+            background: linear-gradient(135deg, #4A00E0 0%, #009FFF 100%);
+            filter: blur(3px);
+        }
+        .card:nth-child(1) .cloud-circle-4 {
+            width: 38px; height: 24px;
+            left: 130px; top: 28px;
+            opacity: 0.5;
+            background: linear-gradient(90deg, #ec2F4B 0%, #8E2DE2 100%);
+            filter: none;
+        }
+        .card:nth-child(2) .cloud-circle-1 {
+            width: 90px; height: 54px;
+            left: 40px; top: 18px;
+            opacity: 0.85;
+            background: linear-gradient(120deg, #009FFF 0%, #ec2F4B 100%);
+            filter: blur(2px);
+        }
+        .card:nth-child(2) .cloud-circle-2 {
+            width: 60px; height: 38px;
+            left: 100px; top: 8px;
+            opacity: 0.7;
+            background: linear-gradient(90deg, #4A00E0 0%, #009FFF 100%);
+            filter: none;
+        }
+        .card:nth-child(2) .cloud-circle-3 {
+            width: 48px; height: 32px;
+            left: 80px; top: 38px;
+            opacity: 0.6;
+            background: linear-gradient(135deg, #ec2F4B 0%, #8E2DE2 100%);
+            filter: blur(3px);
+        }
+        .card:nth-child(2) .cloud-circle-4 {
+            width: 38px; height: 24px;
+            left: 130px; top: 28px;
+            opacity: 0.5;
+            background: linear-gradient(90deg, #8E2DE2 0%, #4A00E0 100%);
+            filter: none;
+        }
+        .card:nth-child(3) .cloud-circle-1 {
+            width: 90px; height: 54px;
+            left: 40px; top: 18px;
+            opacity: 0.85;
+            background: linear-gradient(120deg, #4A00E0 0%, #009FFF 100%);
+            filter: blur(2px);
+        }
+        .card:nth-child(3) .cloud-circle-2 {
+            width: 60px; height: 38px;
+            left: 100px; top: 8px;
+            opacity: 0.7;
+            background: linear-gradient(90deg, #ec2F4B 0%, #8E2DE2 100%);
+            filter: none;
+        }
+        .card:nth-child(3) .cloud-circle-3 {
+            width: 48px; height: 32px;
+            left: 80px; top: 38px;
+            opacity: 0.6;
+            background: linear-gradient(135deg, #009FFF 0%, #ec2F4B 100%);
+            filter: blur(3px);
+        }
+        .card:nth-child(3) .cloud-circle-4 {
+            width: 38px; height: 24px;
+            left: 130px; top: 28px;
+            opacity: 0.5;
+            background: linear-gradient(90deg, #4A00E0 0%, #009FFF 100%);
+            filter: none;
+        }
+        .card:nth-child(4) .cloud-circle-1 {
+            width: 90px; height: 54px;
+            left: 40px; top: 18px;
+            opacity: 0.85;
+            background: linear-gradient(120deg, #ec2F4B 0%, #8E2DE2 100%);
+            filter: blur(2px);
+        }
+        .card:nth-child(4) .cloud-circle-2 {
+            width: 60px; height: 38px;
+            left: 100px; top: 8px;
+            opacity: 0.7;
+            background: linear-gradient(90deg, #8E2DE2 0%, #4A00E0 100%);
+            filter: none;
+        }
+        .card:nth-child(4) .cloud-circle-3 {
+            width: 48px; height: 32px;
+            left: 80px; top: 38px;
+            opacity: 0.6;
+            background: linear-gradient(135deg, #ec2F4B 0%, #8E2DE2 100%);
+            filter: blur(3px);
+        }
+        .card:nth-child(4) .cloud-circle-4 {
+            width: 38px; height: 24px;
+            left: 130px; top: 28px;
+            opacity: 0.5;
+            background: linear-gradient(90deg, #ec2F4B 0%, #8E2DE2 100%);
+            filter: none;
+        }
+        
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3498db, #1a5276);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .card-icon i {
+            font-size: 24px;
+            color: white;
+        }
+        
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            font-family: 'Montserrat', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            letter-spacing: 0.06em;
+            background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 25%, #ec4899 50%, #ef4444 75%, #f97316 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 12px rgba(59,130,246,0.25), 0 1px 4px rgba(239,68,68,0.18);
+        }
+        
+        .card-subtitle {
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            line-height: 1.3;
+            font-weight: 700;
+            background: linear-gradient(90deg, #ADA996 0%, #F2F2F2 33%, #DBDBDB 66%, #EAEAEA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+        
+        .card-content {
+            padding: 0 20px 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .features-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #111;
+            display: flex;
+            align-items: center;
+            text-shadow: none;
+        }
+        
+        .features-title i {
+            margin-right: 8px;
+            color: #3498db;
+        }
+        
+        .features {
+            list-style-type: none;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        
+        .features li {
+            padding: 4px 0;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.3;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+        }
+        
+        .features li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-size: 1.2rem;
+            top: 1px;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(52, 152, 219, 0.5);
+        }
+        
+        .card-footer {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .tech-tag {
+            background: #3b82f6; /* 默认蓝色 */
+            color: #fff;
+            font-size: 0.65rem;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-weight: 500;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+        }
+        .card:nth-child(2) .tech-tag {
+            background: #10b981; /* 绿色 */
+        }
+        .card:nth-child(3) .tech-tag {
+            background: #ef4444; /* 红色 */
+        }
+        .card:nth-child(4) .tech-tag {
+            background: #f59e42; /* 黄色 */
+        }
+        
+        /* Card color variations with enhanced shadows */
+        .card:nth-child(1) .card-icon { 
+            background: linear-gradient(135deg, #3498db, #1a5276);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
+        }
+        .card:nth-child(2) .card-icon { 
+            background: linear-gradient(135deg, #9b59b6, #6c3483);
+            box-shadow: 0 6px 12px rgba(155, 89, 182, 0.3);
+        }
+        .card:nth-child(3) .card-icon { 
+            background: linear-gradient(135deg, #2ecc71, #1e8449);
+            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+        }
+        .card:nth-child(4) .card-icon { 
+            background: linear-gradient(135deg, #e74c3c, #922b21);
+            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
+        }
+        
+        .card:nth-child(1) .features li:before { 
+            color: #3498db;
+            text-shadow: 0 0 8px rgba(52, 152, 219, 0.6);
+        }
+        .card:nth-child(2) .features li:before { 
+            color: #9b59b6;
+            text-shadow: 0 0 8px rgba(155, 89, 182, 0.6);
+        }
+        .card:nth-child(3) .features li:before { 
+            color: #2ecc71;
+            text-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+        }
+        .card:nth-child(4) .features li:before { 
+            color: #e74c3c;
+            text-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+        }
+        
+        .feature-cards-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .feature-card {
+            background: #E9E4F0 !important;
+            border-radius: 6px;
+            border: 1.5px solid rgba(255,255,255,0.35);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10), 0 1.5px 0 rgba(255,255,255,0.18) inset;
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            color: #232323;
+            font-weight: 600;
+            min-width: 120px;
+            text-align: left;
+            margin-bottom: 0;
+            position: relative;
+            transition: box-shadow 0.2s, border 0.2s;
+        }
+        .feature-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.16);
+            border: 1.5px solid rgba(115,3,192,0.25);
+        }
+        .feature-card::before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            border-radius: 4px 0 0 4px;
+            background: linear-gradient(180deg, #8E2DE2 0%, #4A00E0 100%);
+            opacity: 0.7;
+        }
+        
+        .global-github-badge {
+            position: fixed;
+            top: 24px;
+            right: 32px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+        }
+        .global-github-badge a {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+            padding: 4px 16px 4px 10px;
+            font-size: 1.08rem;
+            color: #24292f;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1.5px solid #e1e4e8;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        .global-github-badge a:hover {
+            background: #f6f8fa;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.14);
+        }
+        .global-github-badge svg {
+            width: 22px;
+            height: 22px;
+            margin-right: 10px;
+        }
+        .card-badges {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+        .card-badges a {
+            display: block;
+            margin-bottom: 4px;
+            padding: 0;
+            background: none;
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+            transition: none;
+        }
+        .card-badges a:last-child {
+            margin-bottom: 0;
+        }
+        .card-badges img {
+            height: 22px;
+            vertical-align: middle;
+        }
+        .feature-card {
+            cursor: pointer;
+            border: 1.5px solid rgba(255,255,255,0.35);
+            transition: box-shadow 0.2s, border 0.2s, background 0.2s;
+        }
+        .feature-card.feature-link {
+            background: linear-gradient(90deg, #f7f7fa 80%, #e6e6f7 100%);
+            color: #3b3b5a;
+            border: 1.5px solid #bdbdf7;
+            font-weight: 700;
+        }
+        .feature-card.feature-link:hover {
+            background: linear-gradient(90deg, #e6e6f7 60%, #d1d1e7 100%);
+            box-shadow: 0 4px 16px rgba(115,3,192,0.10);
+            border: 1.5px solid #7303c0;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .cards-container {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+                padding: 15px 0;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .card {
+                font-size: 0.9rem;
+            }
+            
+            .card-title {
+                font-size: 1.4rem;
+            }
+            
+            .card-subtitle {
+                font-size: 0.85rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .cards-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+                padding: 10px 0;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="agnx-app"></div>
+    <script type="module">
+    async function renderAgnx() {
+        const resp = await fetch('./data.json');
+        const data = await resp.json();
+        const app = document.getElementById('agnx-app');
+        let html = '';
+        // 全局GitHub徽章
+        if(data.url) {
+            // 提取用户名
+            let user = data.url.match(/github\.com\/([^\/]+)/);
+            user = user ? user[1] : data.url;
+            html += `<div class="global-github-badge"><a href="${data.url}" target="_blank" title="GitHub">
+                <svg viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+                ${user}
+            </a></div>`;
+        }
+        html += '<header>';
+        if(data.url) {
+            html += `<h1><a href="${data.url}" class="agnx-link" target="_blank">${data.mainTitle}</a></h1>`;
+        } else {
+            html += `<h1>${data.mainTitle}</h1>`;
+        }
+        for(const sub of data.subtitles) {
+            if(typeof sub === 'object' && sub.url) {
+                html += `<p class="subtitle"><a href="${sub.url}" class="agnx-link" target="_blank">${sub.text}</a></p>`;
+            } else if(typeof sub === 'object' && sub.text) {
+                html += `<p class="subtitle">${sub.text}</p>`;
+            } else {
+                html += `<p class="subtitle">${sub}</p>`;
+            }
+        }
+        html += '</header>';
+        // 卡片
+        html += '<div class="cards-container">';
+        data.cards.forEach((card, idx) => {
+            html += `
+            <div class="card">
+                <div class="card-header" style="position:relative;">
+                    <div class="card-badges">
+                        ${(card.url ? (() => {
+                            let match = card.url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+                            if (!match) return '';
+                            let user = match[1], repo = match[2];
+                            return `<a href='${card.url}' target='_blank' title='GitHub'><img src='https://img.shields.io/github/stars/${user}/${repo}?style=social' alt='GitHub stars'></a>`;
+                        })() : '')}
+                        ${(card.docsUrl ? `<a href='${card.docsUrl}' target='_blank' title='Docs'><img src='https://img.shields.io/badge/docs-latest-blue.svg' alt='Docs'></a>` : '')}
+                    </div>
+                    <div class="card-icon">
+                        <i class="fas fa-${['project-diagram','comments','robot','vial'][idx]}"></i>
+                    </div>
+                    <h2 class="card-title">${card.title}</h2>
+                    <p class="card-subtitle">${card.subtitle}</p>
+                </div>
+                <div class="card-content">
+                    <h3 class="features-title">${card.featuresTitle}</h3>
+                    <div class="feature-cards-vertical">
+                        ${card.features.map(f=>
+                            (typeof f === 'object' && f.url) ?
+                                `<div class='feature-card feature-link' onclick="window.open('${f.url}', '_blank')">${f.text}</div>` :
+                            (typeof f === 'object' && f.text) ?
+                                `<div class='feature-card'>${f.text}</div>` :
+                                `<div class='feature-card'>${f}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="tech-tags">
+                        ${card.tags.map(tag=>`<span class="tech-tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+        html += '</div>';
+        app.innerHTML = html;
+    }
+    renderAgnx();
+    </script>
+</body>
+</html>

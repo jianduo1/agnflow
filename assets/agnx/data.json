@@ -1,0 +1,78 @@
+{
+  "mainTitle": "AgnX 系列产品",
+  "url": "https://github.com/jianduo1",
+  "subtitles": [
+    { "text": "AgnFlow、AgnChat、AgnAuto、AgnTest四大产品共同构建了完整的智能体开发生态系统", "url": "https://github.com/jianduo1/agnflow" },
+    { "text": "覆盖智能体工作流、人机交互、自动化测试、软测全流程管理等关键领域" }
+  ],
+  "cards": [
+    {
+      "title": "AgnFlow",
+      "url": "https://github.com/jianduo1/agnflow",
+      "docsUrl": "https://github.com/jianduo1/agnflow/docs",
+      "subtitle": "智能体工作流基础框架，快速开发复杂智能体工作流",
+      "featuresTitle": "🚀 核心特性",
+      "features": [
+        { "text": "智谱免费API集成", "url": "https://github.com/jianduo1/agnflow/docs/api" },
+        { "text": "多智能体通信协议：a2a, mcp", "url": "https://github.com/jianduo1/agnflow/docs/protocol" },
+        { "text": "函数调用路由机制", "url": "https://github.com/jianduo1/agnflow/docs/router" },
+        { "text": "支持RabbitMQ/Kafka消息队列", "url": "https://github.com/jianduo1/agnflow/docs/queue" },
+        { "text": "JSONRPC/HTTP/SSE协议支持", "url": "https://github.com/jianduo1/agnflow/docs/protocol" },
+        { "text": "FastAPI集成", "url": "https://github.com/jianduo1/agnflow/docs/fastapi" },
+        { "text": "MediaCrawler集成", "url": "https://github.com/jianduo1/agnflow/docs/media" }
+      ],
+      "tags": ["Multi-Agent", "FastAPI", "Workflow"]
+    },
+    {
+      "title": "AgnChat",
+      "url": "https://github.com/jianduo1/agnchat",
+      "docsUrl": "https://github.com/jianduo1/agnchat/docs",
+      "subtitle": "智能体聊天WebUI应用，支持多模态交互与动态代码生成",
+      "featuresTitle": "💬 核心特性",
+      "features": [
+        { "text": "多模态支持（文本/语音/图像）", "url": "https://github.com/jianduo1/agnflow/docs/multimodal" },
+        { "text": "智谱AI深度集成", "url": "https://github.com/jianduo1/agnflow/docs/api" },
+        { "text": "人机交互工作流：复述-解析-编辑-执行", "url": "https://github.com/jianduo1/agnflow/docs/interaction" },
+        { "text": "XML指令解析与确认机制", "url": "https://github.com/jianduo1/agnflow/docs/xml" },
+        { "text": "动态执行生成代码（AIPY）", "url": "https://github.com/jianduo1/agnflow/docs/aipy" },
+        { "text": "智能体进化（OpenEvolve）", "url": "https://github.com/jianduo1/agnflow/docs/openevolve" },
+        { "text": "分布式部署架构", "url": "https://github.com/jianduo1/agnflow/docs/distributed" }
+      ],
+      "tags": ["可视化", "多模态", "分布式"]
+    },
+    {
+      "title": "AgnAuto",
+      "url": "https://github.com/jianduo1/agnauto",
+      "docsUrl": "https://github.com/jianduo1/agnauto/docs",
+      "subtitle": "自动化测试智能体引擎，实现全栈自动化测试能力",
+      "featuresTitle": "🤖 核心组件",
+      "features": [
+        { "text": "API测试智能体", "url": "https://github.com/jianduo1/agnflow/docs/api" },
+        { "text": "GUI自动化测试引擎", "url": "https://github.com/jianduo1/agnflow/docs/gui" },
+        { "text": "性能测试模块（PERF）", "url": "https://github.com/jianduo1/agnflow/docs/perf" },
+        { "text": "流量录制与分析", "url": "https://github.com/jianduo1/agnflow/docs/traffic" },
+        { "text": "智能测试用例生成", "url": "https://github.com/jianduo1/agnflow/docs/testcase" },
+        { "text": "跨平台测试支持", "url": "https://github.com/jianduo1/agnflow/docs/platform" },
+        { "text": "自愈式测试执行", "url": "https://github.com/jianduo1/agnflow/docs/selfhealing" }
+      ],
+      "tags": ["自动化", "API测试", "GUI测试"]
+    },
+    {
+      "title": "AgnTest",
+      "url": "https://github.com/jianduo1/agntest",
+      "docsUrl": "https://github.com/jianduo1/agntest/docs",
+      "subtitle": "自动化测试智能体WebUI平台，全流程测试管理",
+      "featuresTitle": "🧪 核心模块",
+      "features": [
+        { "text": "项目管理：组织测试资源", "url": "https://github.com/jianduo1/agnflow/docs/project" },
+        { "text": "场景管理：构建测试场景", "url": "https://github.com/jianduo1/agnflow/docs/scenario" },
+        { "text": "用例管理：创建维护测试用例", "url": "https://github.com/jianduo1/agnflow/docs/testcase" },
+        { "text": "缺陷跟踪：问题全生命周期管理", "url": "https://github.com/jianduo1/agnflow/docs/defect" },
+        { "text": "报告中心：可视化测试报告", "url": "https://github.com/jianduo1/agnflow/docs/report" },
+        { "text": "任务调度：自动化测试执行", "url": "https://github.com/jianduo1/agnflow/docs/schedule" },
+        { "text": "智能分析：测试数据洞察", "url": "https://github.com/jianduo1/agnflow/docs/analysis" }
+      ],
+      "tags": ["项目管理", "缺陷跟踪", "报告分析"]
+    }
+  ]
+} 
