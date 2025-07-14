@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AgnFlow Stream Chat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --main-color: #00B4DB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-smooth: always;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            background: rgba(20, 30, 50, 0.95);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 650px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px 8px var(--main-color), 0 8px 40px rgba(0, 255, 255, 0.08);
+            border: 2px solid var(--main-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-container:before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: 24px;
+            box-shadow: 0 0 80px 10px var(--main-color) inset, 0 0 40px 2px #1a2980 inset;
+            opacity: 0.15;
+        }
+
+        .header {
+            padding: 24px 20px 16px 20px;
+            background: linear-gradient(90deg, #232526 0%, #0f2027 100%);
+            border-bottom: 2px solid var(--main-color);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-family: 'Orbitron', 'Segoe UI', Arial, sans-serif;
+            font-weight: 600;
+            color: var(--main-color);
+            letter-spacing: 2px;
+            text-shadow: 0 0 2px var(--main-color), 0 0 1px #fff;
+            margin-bottom: 6px;
+        }
+
+        .status {
+            font-size: 15px;
+            color: #b2fefa;
+            font-weight: 500;
+            text-shadow: none;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            background: linear-gradient(135deg, #232526 0%, #0f2027 100%);
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 14px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            border: 1.5px solid var(--main-color);
+            position: relative;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            font-weight: 400;
+            color: #232526;
+            background: #eaffff;
+            box-shadow: none !important;
+            text-shadow: none !important;
+            white-space: pre-wrap;
+        }
+
+        .user-message {
+            background: var(--main-color);
+            color: #232526;
+            align-self: flex-end;
+            border-bottom-right-radius: 6px;
+            border: 1.5px solid var(--main-color);
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            font-weight: 500;
+            box-shadow: none !important;
+            text-shadow: none !important;
+            white-space: pre-wrap;
+        }
+
+        .ai-message {
+            background: #232526;
+            color: var(--main-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+            border: 1.5px solid var(--main-color);
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            font-weight: 500;
+            box-shadow: none !important;
+            text-shadow: none !important;
+            white-space: pre-wrap;
+        }
+
+        .input-container {
+            padding: 20px 20px 20px 20px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 14px;
+            background: linear-gradient(90deg, #232526 0%, #0f2027 100%);
+            border-top: 2px solid var(--main-color);
+            z-index: 1;
+        }
+
+        .deep-think-btn {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            transform: translateY(-50%);
+            padding: 6px 18px;
+            background: #232526;
+            color: var(--main-color);
+            border: 1.5px solid var(--main-color);
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+        #messageInput {
+            flex: 1;
+            min-height: 40px;
+            max-height: 120px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 28px;
+            background: #101c2c;
+            color: var(--main-color);
+            font-size: 16px;
+            outline: none;
+            box-shadow: 0 2px 10px var(--main-color)33, 0 2px 8px #000a;
+            border: 1.5px solid var(--main-color);
+            transition: border 0.2s, box-shadow 0.2s;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            overflow-y: hidden;
+            resize: none;
+            scrollbar-width: thin;
+            scrollbar-color: var(--main-color) #101c2c;
+        }
+
+        #messageInput::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #messageInput::-webkit-scrollbar-thumb {
+            background: var(--main-color);
+            border-radius: 3px;
+        }
+
+        #messageInput::-webkit-scrollbar-track {
+            background: #101c2c;
+        }
+
+        #messageInput:focus {
+            border: 2px solid var(--main-color);
+            box-shadow: 0 0 12px 2px var(--main-color)cc;
+        }
+
+        #messageInput::placeholder {
+            color: var(--main-color)99;
+        }
+
+        #sendButton {
+            padding: 14px 28px;
+            background: linear-gradient(90deg, var(--main-color) 0%, #1a2980 100%);
+            color: #232526;
+            border: none;
+            border-radius: 28px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 10px var(--main-color)99, 0 2px 8px #000a;
+            transition: all 0.2s;
+            border: 1.5px solid var(--main-color);
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 4px 20px var(--main-color)cc, 0 2px 8px #000a;
+            background: linear-gradient(90deg, #1a2980 0%, var(--main-color) 100%);
+            color: var(--main-color);
+        }
+
+        #sendButton:disabled {
+            background: #232526;
+            color: var(--main-color)55;
+            cursor: not-allowed;
+            transform: none;
+            border: 1.5px solid var(--main-color)55;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: var(--main-color)55;
+            border-radius: 4px;
+        }
+
+        details {
+            margin: 2px 2px !important;
+        }
+
+        .reasoning-block {
+            margin: 16px 0;
+            background: #101c2c;
+            border: 1.5px solid var(--main-color);
+            border-radius: 12px;
+            color: var(--main-color);
+            font-size: 15px;
+            box-shadow: 0 2px 8px var(--main-color)33;
+            padding: 0 0 8px 0;
+        }
+
+        .reasoning-block summary {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 8px 8px !important;
+            outline: none;
+            color: var(--main-color);
+        }
+
+        .reasoning-content {
+            padding: 10px 18px 0 18px;
+            color: #b2fefa;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        .conclusion-block {
+            background: #232526;
+            color: var(--main-color);
+            font-size: 16px;
+            font-weight: 600;
+            white-space: pre-wrap;
+        }
+
+        .deep-think-btn.active {
+            background: linear-gradient(90deg, var(--main-color) 0%, #1a2980 100%) !important;
+            color: #232526 !important;
+            border: 1.5px solid var(--main-color) !important;
+        }
+
+        .code-block {
+            color: skyblue;
+            border: 1px solid var(--main-color);
+            padding: 5px;
+            background: #181c24;
+            border-radius: 8px;
+            font-size: 14px;
+            overflow-x: auto;
+            white-space: pre;
+            max-width: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: var(--main-color) #181c24;
+        }
+
+        .code-block::-webkit-scrollbar {
+            height: 8px;
+            background: #181c24;
+        }
+
+        .code-block::-webkit-scrollbar-thumb {
+            background: var(--main-color);
+            border-radius: 4px;
+        }
+
+        .code-block::-webkit-scrollbar-track {
+            background: #181c24;
+        }
+
+        .code-block .line-number {
+            display: inline-block;
+            width: 1em;
+            color: var(--main-color);
+            user-select: none;
+            opacity: 0.7;
+            text-align: right;
+            margin-right: 0.3em;
+        }
+
+        .msg-delete-btn {
+            position: absolute;
+            bottom: 4px;
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .msg-delete-btn:hover {
+            opacity: 1;
+        }
+        .msg-delete-btn.left {
+            left: -28px;
+        }
+        .msg-delete-btn.right {
+            right: -28px;
+        }
+        .message {
+            position: relative;
+        }
+
+        .msg-content {
+            width: 100%;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap');
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>AgnFlow 聊天室 <span class="status" id="status">连接中...</span></h1>
+
+            <button id="newConvBtn"
+                style="position:absolute;left:24px;top:60px;padding:6px 18px;background:#232526;color:var(--main-color);border:1.5px solid var(--main-color);border-radius:18px;cursor:pointer;font-weight:600;font-size:14px;z-index:2;">新增对话</button>
+            <button id="switchConvBtn"
+                style="position:absolute;left:150px;top:60px;padding:6px 18px;background:#232526;color:var(--main-color);border:1.5px solid var(--main-color);border-radius:18px;cursor:pointer;font-weight:600;font-size:14px;z-index:2;">切换对话</button>
+            <button id="clearHistoryBtn"
+                style="position:absolute;right:24px;top:60px;padding:6px 18px;background:#232526;color:var(--main-color);border:1.5px solid var(--main-color);border-radius:18px;cursor:pointer;font-weight:600;font-size:14px;z-index:2;">清空聊天记录</button>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div class="input-container">
+            <button id="thinkButton" class="deep-think-btn">深度思考</button>
+            <textarea id="messageInput" placeholder="给 AgnFlow 发送消息" disabled rows="1" style="resize:none;"></textarea>
+            <button id="sendButton" disabled>发送</button>
+        </div>
+    </div>
+    <script>
+        // 会话管理
+        let currentConversationId = localStorage.getItem('agnflow_conversation_id') || null;
+        let ws = null;
+        const messagesDiv = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const statusDiv = document.getElementById('status');
+        const clearBtn = document.getElementById('clearHistoryBtn');
+        const newConvBtn = document.getElementById('newConvBtn');
+        const switchConvBtn = document.getElementById('switchConvBtn');
+        let isStreaming = false;
+        let currentAiMessageDiv = null;
+        let currentAiMessage = '';
+        let reasoning = false;
+
+        // 会话弹窗
+        function showConversationList() {
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.left = '0';
+            modal.style.top = '0';
+            modal.style.width = '100vw';
+            modal.style.height = '100vh';
+            modal.style.background = 'rgba(0,0,0,0.3)';
+            modal.style.zIndex = 1000;
+            modal.innerHTML = '<div id="convListPanel" style="position:absolute;left:50%;top:20%;transform:translateX(-50%);background:#232526;border:2px solid var(--main-color);border-radius:16px;padding:24px 32px;min-width:320px;max-width:90vw;box-shadow:0 8px 32px var(--main-color)99;">加载中...</div>';
+            document.body.appendChild(modal);
+            fetch('/api/conversations').then(r => r.json()).then(list => {
+                let html = '<h3 style="color:var(--main-color);margin-bottom:12px;">会话列表</h3>';
+                if (list.length === 0) html += '<div style="color:#fff;">暂无会话</div>';
+                html += '<ul style="list-style:none;padding:0;margin:0;max-height:300px;overflow:auto;">';
+                for (const conv of list) {
+                    html += `<li style="margin-bottom:10px;display:flex;align-items:center;">
+                        <button data-id="${conv.id}" style="flex:1;text-align:left;background:${conv.id === currentConversationId ? 'var(--main-color)' : '#101c2c'};color:${conv.id === currentConversationId ? '#232526' : 'var(--main-color)'};border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;">${conv.id.slice(0, 8)}...${conv.id.slice(-4)}</button>
+                        <button data-del="${conv.id}" style="margin-left:8px;background:#ff3b3b;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">删除</button>
+                    </li>`;
+                }
+                html += '</ul>';
+                html += '<div style="text-align:right;margin-top:10px;"><button id="closeConvList" style="background:#232526;color:var(--main-color);border:1.5px solid var(--main-color);border-radius:8px;padding:6px 18px;cursor:pointer;">关闭</button></div>';
+                document.getElementById('convListPanel').innerHTML = html;
+                // 切换
+                document.querySelectorAll('[data-id]').forEach(btn => {
+                    btn.onclick = () => {
+                        const id = btn.getAttribute('data-id');
+                        if (id !== currentConversationId) {
+                            localStorage.setItem('agnflow_conversation_id', id);
+                            location.reload();
+                        }
+                    };
+                });
+                // 删除
+                document.querySelectorAll('[data-del]').forEach(btn => {
+                    btn.onclick = async () => {
+                        const id = btn.getAttribute('data-del');
+                        if (confirm('确定要删除该对话及其所有消息吗？')) {
+                            await fetch(`/api/conversation/${id}`, { method: 'DELETE' });
+                            if (id === currentConversationId) {
+                                localStorage.removeItem('agnflow_conversation_id');
+                                location.reload();
+                            } else {
+                                btn.parentElement.remove();
+                            }
+                        }
+                    };
+                });
+                document.getElementById('closeConvList').onclick = () => modal.remove();
+            });
+        }
+
+        // 新建对话
+        newConvBtn.onclick = async function () {
+            const res = await fetch('/api/conversation', { method: 'POST' });
+            const data = await res.json();
+            localStorage.setItem('agnflow_conversation_id', data.id);
+            location.reload();
+        };
+        // 切换对话
+        switchConvBtn.onclick = showConversationList;
+
+        // 删除当前对话
+        clearBtn.onclick = async function () {
+            if (!currentConversationId) return;
+            if (!confirm('确定要删除当前对话及其所有消息吗？')) return;
+            await fetch(`/api/conversation/${currentConversationId}`, { method: 'DELETE' });
+            localStorage.removeItem('agnflow_conversation_id');
+            location.reload();
+        };
+
+        // 渲染历史消息
+        function renderHistoryItem(msg) {
+            // msg: {id, role, content, timestamp}
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + (msg.role === 'ai' ? 'ai-message' : 'user-message');
+            msgDiv.setAttribute('data-id', msg.id);
+            // 内容容器
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'msg-content';
+            contentDiv.innerHTML = msg.role === 'ai' ? formatReasoningBlocks(msg.content) : msg.content;
+            msgDiv.appendChild(contentDiv);
+            // 删除按钮
+            const delBtn = document.createElement('button');
+            delBtn.className = 'msg-delete-btn ' + (msg.role === 'ai' ? 'right' : 'left');
+            delBtn.innerText = '🗑️';
+            delBtn.title = '删除此消息';
+            delBtn.onclick = async function(e) {
+                e.stopPropagation();
+                const msgId = msgDiv.getAttribute('data-id');
+                if (msgId) {
+                    await fetch(`/api/message/${msgId}`, {method: 'DELETE'});
+                }
+                msgDiv.remove();
+            };
+            msgDiv.appendChild(delBtn);
+            messagesDiv.appendChild(msgDiv);
+        }
+
+        // WebSocket连接与历史加载
+        function connectWS() {
+            if (ws) ws.close();
+            messagesDiv.innerHTML = '';
+            ws = new WebSocket(`ws://localhost:8000/ws`);
+            ws.onopen = function () {
+                statusDiv.textContent = '🟢 连接成功';
+                messageInput.disabled = false;
+                sendButton.disabled = false;
+                messageInput.focus();
+                ws.send(JSON.stringify({ conversation: currentConversationId }));
+            };
+            ws.onmessage = function (event) {
+                const data = JSON.parse(event.data);
+                if (data.type === 'history') {
+                    renderHistoryItem(data);
+                    return;
+                }
+                if (data.type === 'start') {
+                    isStreaming = true;
+                    currentAiMessage = '';
+                    currentAiMessageDiv = document.createElement('div');
+                    currentAiMessageDiv.className = 'message ai-message';
+                    // 内容容器
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'msg-content';
+                    currentAiMessageDiv.appendChild(contentDiv);
+                    // 删除按钮
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'msg-delete-btn right';
+                    delBtn.innerText = '🗑️';
+                    delBtn.title = '删除此消息';
+                    delBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        currentAiMessageDiv.remove();
+                    };
+                    currentAiMessageDiv.appendChild(delBtn);
+                    messagesDiv.appendChild(currentAiMessageDiv);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    sendButton.disabled = true;
+                    statusDiv.textContent = '🤖 流式回复中';
+                } else if (data.type === 'chunk') {
+                    currentAiMessage += data.content;
+                    const contentDiv = currentAiMessageDiv.querySelector('.msg-content');
+                    // 始终使用formatReasoningBlocks处理AI消息内容
+                    contentDiv.innerHTML = formatReasoningBlocks(currentAiMessage);
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                } else if (data.type === 'end') {
+                    isStreaming = false;
+                    sendButton.disabled = false;
+                    statusDiv.textContent = '🟢 连接成功';
+                    messageInput.focus();
+                    currentAiMessageDiv = null;
+                    currentAiMessage = '';
+                }
+            };
+            ws.onclose = function () {
+                statusDiv.textContent = '🔴 连接断开';
+                messageInput.disabled = true;
+                sendButton.disabled = true;
+            };
+        }
+
+        // 初始化会话
+        if (!currentConversationId) {
+            // 自动新建一个
+            (async () => {
+                const res = await fetch('/api/conversation', { method: 'POST' });
+                const data = await res.json();
+                currentConversationId = data.id;
+                localStorage.setItem('agnflow_conversation_id', data.id);
+                connectWS();
+            })();
+        } else {
+            connectWS();
+        }
+        // 深度思考按钮切换开关逻辑（仅切换模式，不重连，不发送请求）
+        const deepBtn = document.getElementById('thinkButton');
+        deepBtn.onclick = function () {
+            reasoning = !reasoning;
+            if (reasoning) {
+                this.classList.add('active');
+            } else {
+                this.classList.remove('active');
+            }
+        };
+        // 发送消息时，根据 reasoning 状态决定是否深度思考
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message && !isStreaming) {
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user-message';
+                // 内容容器
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'msg-content';
+                contentDiv.innerHTML = message;
+                userMessage.appendChild(contentDiv);
+                // 删除按钮
+                const delBtn = document.createElement('button');
+                delBtn.className = 'msg-delete-btn left';
+                delBtn.innerText = '🗑️';
+                delBtn.title = '删除此消息';
+                delBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    userMessage.remove();
+                };
+                userMessage.appendChild(delBtn);
+                messagesDiv.appendChild(userMessage);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                ws.send(JSON.stringify({
+                    type: 'message',
+                    content: message,
+                    options: {
+                        reasoning: reasoning
+                    }
+                }));
+                messageInput.value = '';
+                statusDiv.textContent = '⏳ 发送中...';
+            }
+        }
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                if (e.shiftKey) {
+                    // 插入换行
+                    const start = messageInput.selectionStart;
+                    const end = messageInput.selectionEnd;
+                    messageInput.value = messageInput.value.slice(0, start) + '\n' + messageInput.value.slice(end);
+                    messageInput.selectionStart = messageInput.selectionEnd = start + 1;
+                    e.preventDefault();
+                } else {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            }
+        });
+        // textarea 高度自适应
+        function autoResizeTextarea(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+            // 动态切换滚动条
+            if (el.scrollHeight > 120) {
+                el.style.overflowY = 'auto';
+            } else {
+                el.style.overflowY = 'hidden';
+            }
+        }
+        messageInput.addEventListener('input', function () {
+            autoResizeTextarea(messageInput);
+        });
+        // 初始化时也自适应
+        autoResizeTextarea(messageInput);
+
+        function formatReasoningBlocks(rawContent) {
+            if (!rawContent) return '';
+            
+            return rawContent
+                .replace(/<reasoning>\s/g, "<details open class='reasoning-block'><summary> 🧠 深度思考</summary><div class='reasoning-content'>")
+                .replace(/<\/reasoning>\s/g, "</div></details>")
+                .replace("<conclusion>", "<div class='conclusion-block'>")
+                .replace("<\/conclusion>", "</div>")
+                .replace(/```([a-zA-Z0-9]*)\s([\s\S]*?)\s```/g, function (_, lang, code) {
+                    // 处理行号
+                    const lines = code.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+                    const numbered = lines.map((line, idx) =>
+                        `<span class="line-number">${idx + 1}</span> ${line}`
+                    ).join('\n');
+                    return `<pre class="code-block">${lang}\n<code lang="${lang}">${numbered}</code></pre>`;
+                })
+                .replace(/\n/g, '<br>'); // 将换行符转换为HTML换行
+        }
+
+        // 主题色切换
+        const themeColors = ['#00B4DB', '#00ffe7', '#FFD93D', '#43E97B', '#1E9600', '#8F6ED5', '#FF8C42'];
+        let themeIndex = 0;
+        document.addEventListener('DOMContentLoaded', function () {
+            const h1 = document.querySelector('.header h1');
+            h1.style.cursor = 'pointer';
+            h1.title = '点击切换主题色';
+            h1.onclick = function () {
+                themeIndex = (themeIndex + 1) % themeColors.length;
+                document.documentElement.style.setProperty('--main-color', themeColors[themeIndex]);
+            };
+        });
+    </script>
+</body>
+
+</html>
