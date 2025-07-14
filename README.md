@@ -31,26 +31,44 @@
 
 ---
 
-<h1 id="english">English Documentation</h1>
+# English Documentation
 
-## 🎯 Core Highlights
-
-### ⚡ Minimalist Syntax - Build in 5 Lines
+### ⚡ **Quick Start - Minimalist Syntax**
 
 ```python
+from typing import TypedDict
 from agnflow import Node, Flow
-n1 = Node("hello", exec=lambda s: {"msg": "world"})
-n2 = Node("world", exec=print)
-state = {"data": "hello"}
-Flow(n1 >> n2).run(state)  # Output: {"data": "hello", 'msg': 'world'}
+
+# Define state
+class State(TypedDict):
+  message: str
+
+# Define nodes
+start = Node(
+  name="start", 
+  exec=lambda s: ("process", {"message": "Hello"}) # Instantiate Node, specify exec
+)
+class ProcessNode(Node): # Inherit Node, override exec
+  def exec(state: State):
+    # Route to end node and update message state
+    return "end", {"message": s["message"] + " World"}
+process = ProcessNode() # No name specified, automatically gets variable name "process"
+end = Node(exec=print) # Print state
+
+# Create workflow
+flow = Flow(start >> process >> end)
+
+# Run workflow
+state: State = {"message": ""}
+flow.run(state)  # Output: {'message': 'Hello World'}
 ```
 
-### 🧠 **Deep Thinking & Reasoning** ⭐️ **New Feature**
+### 🧠 **Static Web Chat Room Experience - Visit Backend Interface http://127.0.0.1:8000/en**
 
 <div align="center">
   <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
-    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/static_page/thinking.en.png" alt="Deep Thinking Process" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/static_page/code.en.png" alt="Code Generation" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/chatbot/thinking.en.png" alt="Deep Thinking Process" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/chatbot/code.en.png" alt="Code Generation" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
   </div>
   <br>
   <em>🧠 Structured reasoning with step-by-step thinking process | 💻 Intelligent code generation with detailed explanations</em>
@@ -62,7 +80,12 @@ Flow(n1 >> n2).run(state)  # Output: {"data": "hello", 'msg': 'world'}
 flow.render_mermaid(saved_file="flow.png")  # Directly generate image
 ```
 
-### 🔄 **Runtime Node Management** ⭐️ **New Feature**
+|                                                        Complex Connection                                                         | Supervisor Agent                                                                                                                      |                                                         Runtime Management                                                          |
+| :-------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------: |
+|                                                `n1 >> [n2 >> n3, n3 >> n4] >> n5`                                                 | `s1[n1, n2, n3] >> n4`                                                                                                                |                                              `flow += new_node`<br>`flow -= old_node`                                               |
+| <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="Complex Connection"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="Supervisor Agent"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="Runtime Management"> |
+
+### 🔄 **Runtime Node Management**
 
 ```python
 # Add/Remove nodes at runtime
@@ -76,18 +99,11 @@ a - b - c      # Symmetrically disconnect
 
 ### 🚀 Advanced Flow Control
 
-- Sync/Async Mixed: `n=Node(exec=sync_func, aexec=async_func)`
+- Sync/Async Mixed: `n = Node(exec=sync_func, aexec=async_func)`
 - Branch/Loop: `n1 >> [n2, n3] >> n1` (n1 points to n2 and n3, n2 and n3 point to n1)
-- Swarm Agent: `s=Swarm(); s[n1, n2, n3] >> n4` (n1, n2, n3 are fully connected inside s)
-- Parallel Flow: `pf=ParallelFlow(); pf[n1, n2, n3]` (Execute child nodes concurrently)
+- Swarm Agent: `s = Swarm(); s[n1, n2, n3] >> n4` (n1, n2, n3 are fully connected inside s)
+- Parallel Flow: `pf = ParallelFlow(); pf[n1, n2, n3]` (Execute child nodes concurrently)
 - Human Review: CLI/API intervention with `hitl`
-
-### 🎨 Feature Showcase
-
-|                                                        Complex Connection                                                         | Supervisor Agent                                                                                                                      |                                                         Runtime Management                                                          |
-| :-------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------: |
-|                                                `n1 >> [n2 >> n3, n3 >> n4] >> n5`                                                 | `s1[n1, n2, n3] >> n4`                                                                                                                |                                              `flow += new_node`<br>`flow -= old_node`                                               |
-| <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="Complex Connection"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="Supervisor Agent"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="Runtime Management"> |
 
 ### 🔄 Workflow Management
 
@@ -99,23 +115,6 @@ a - b - c      # Symmetrically disconnect
 
 ```bash
 pip install agnflow
-```
-
-### 🎯 Quick Start
-
-```python
-from agnflow import Node, Flow
-
-# Define nodes
-start = Node("start", lambda s: {"message": "Hello"})
-process = Node("process", lambda s: {"message": s["message"] + " World"})
-end = Node("end", print)
-
-# Create workflow
-flow = Flow(start >> process >> end)
-
-# Run workflow
-flow.run()  # Output: {'message': 'Hello World'}
 ```
 
 ### 📚 Documentation
@@ -137,26 +136,44 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-<h1 id="chinese">中文文档</h1>
+# 中文文档
 
-## 🎯 核心亮点
-
-### ⚡ **极简语法 - 5 行代码构建**
+### ⚡ **快速开始 - 极简语法**
 
 ```python
+from typing import TypedDict
 from agnflow import Node, Flow
-n1 = Node("hello", exec=lambda s: {"msg": "world"})
-n2 = Node("world", exec=print)
-state = {"data": "hello"}
-Flow(n1 >> n2).run(state)  # 输出: {"data": "hello", 'msg': 'world'}
+
+# 定义状态
+class State(TypedDict):
+  message: str
+
+# 定义节点
+start = Node(
+  name="start", 
+  exec=lambda s: ("process", {"message": "Hello"}) # 实例化 Node，指定 exec 
+)
+class ProcessNode(Node): # 继承 Node，重写 exec
+  def exec(state: State):
+    # 路由到 end 节点，并且更新 message 状态，
+    return "end", {"message": s["message"] + " World"}
+process = ProcessNode() #  没有指定 name 属性，自动获取实例化变量名 "process"
+end = Node(exec=print) # 打印 state
+
+# 创建工作流
+flow = Flow(start >> process >> end)
+
+# 运行工作流
+state: State = {"message": ""}
+flow.run(state)  # 输出: {'message': 'Hello World'}
 ```
 
-### 🧠 **深度思考与推理** ⭐️ **新功能**
+### 🧠 **静态Web聊天室体验 - 访问后端接口 http://127.0.0.1:8000/zh **
 
 <div align="center">
   <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
-    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/static_page/thinking.zh.png" alt="深度思考过程" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/static_page/code.zh.png" alt="代码生成" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/chatbot/thinking.zh.png" alt="深度思考过程" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/chatbot/code.zh.png" alt="代码生成" height="300" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
   </div>
   <br>
   <em>🧠 结构化推理，每一步都有清晰的思考过程 | 💻 智能代码生成，提供详细解释</em>
@@ -168,7 +185,12 @@ Flow(n1 >> n2).run(state)  # 输出: {"data": "hello", 'msg': 'world'}
 flow.render_mermaid(saved_file="flow.png")  # 直接生成图片
 ```
 
-### 🔄 **运行期动态节点管理** ⭐️ **新功能**
+|                                                        复杂连接                                                         | 监督者智能体                                                                                                                    |                                                         运行期管理                                                          |
+| :---------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------: |
+|                                           `n1 >> [n2 >> n3, n3 >> n4] >> n5`                                            | `s1[n1, n2, n3] >> n4`                                                                                                          |                                          `flow += new_node`<br>`flow -= old_node`                                           |
+| <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="复杂连接"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="蜂群智能体"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="运行期管理"> |
+
+### 🔄 **运行期动态节点管理**
 
 ```python
 # 运行期增删节点
@@ -182,18 +204,11 @@ a - b - c      # 对称断开
 
 ### 🚀 高级流程控制
 
-- 同步/异步混合: `n=Node(exec=sync_func, aexec=async_func)`
+- 同步/异步混合: `n = Node(exec=sync_func, aexec=async_func)`
 - 分支/循环: `n1 >> [n2, n3] >> n1`（n1 指向 n2 和 n3，n2 和 n3 指向 n1）
-- 蜂群智能体: `s=Swarm(); s[n1, n2, n3] >> n4`（s 内部的 n1，n2，n3 全互连）
-- 并行工作流: `pf=ParallelFlow(); pf[n1, n2, n3]`（并发执行多个子节点）
+- 蜂群智能体: `s = Swarm(); s[n1, n2, n3] >> n4`（s 内部的 n1，n2，n3 全互连）
+- 并行工作流: `pf = ParallelFlow(); pf[n1, n2, n3]`（并发执行多个子节点）
 - 人工审核: CLI/API 介入 `hitl`
-
-### 🎨 功能展示
-
-|                                                        复杂连接                                                         | 监督者智能体                                                                                                                    |                                                         运行期管理                                                          |
-| :---------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------: |
-|                                           `n1 >> [n2 >> n3, n3 >> n4] >> n5`                                            | `s1[n1, n2, n3] >> n4`                                                                                                          |                                          `flow += new_node`<br>`flow -= old_node`                                           |
-| <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="复杂连接"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="蜂群智能体"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="运行期管理"> |
 
 ### 🔄 工作流管理
 
@@ -205,23 +220,6 @@ a - b - c      # 对称断开
 
 ```bash
 pip install agnflow
-```
-
-### 🎯 快速开始
-
-```python
-from agnflow import Node, Flow
-
-# 定义节点
-start = Node("start", lambda s: {"message": "Hello"})
-process = Node("process", lambda s: {"message": s["message"] + " World"})
-end = Node("end", print)
-
-# 创建工作流
-flow = Flow(start >> process >> end)
-
-# 运行工作流
-flow.run()  # 输出: {'message': 'Hello World'}
 ```
 
 ### 📚 文档
