@@ -33,7 +33,7 @@
 
 # English Documentation
 
-### ⚡ **Quick Start - Minimalist Syntax**
+### ⚡ Quick Start - Minimalist Syntax
 
 ```python
 from typing import TypedDict
@@ -45,7 +45,7 @@ class State(TypedDict):
 
 # Define nodes
 start = Node(
-  name="start", 
+  name="start",
   exec=lambda s: ("process", {"message": "Hello"}) # Instantiate Node, specify exec
 )
 class ProcessNode(Node): # Inherit Node, override exec
@@ -63,7 +63,14 @@ state: State = {"message": ""}
 flow.run(state)  # Output: {'message': 'Hello World'}
 ```
 
-### 🧠 **Static Web Chat Room Experience - Visit Backend Interface http://127.0.0.1:8000/en**
+### 🤖 Static Web Chat Room Experience - Visit Backend Interface http://127.0.0.1:8000/en
+
+```python
+from agnflow.chatbot.server import Server
+
+server = Server()
+server.run()
+```
 
 <div align="center">
   <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
@@ -74,7 +81,7 @@ flow.run(state)  # Output: {'message': 'Hello World'}
   <em>🧠 Structured reasoning with step-by-step thinking process | 💻 Intelligent code generation with detailed explanations</em>
 </div>
 
-### 🎨 **Automatic Flow Visualization**
+### 🎨 Automatic Flow Visualization
 
 ```python
 flow.render_mermaid(saved_file="flow.png")  # Directly generate image
@@ -85,7 +92,7 @@ flow.render_mermaid(saved_file="flow.png")  # Directly generate image
 |                                                `n1 >> [n2 >> n3, n3 >> n4] >> n5`                                                 | `s1[n1, n2, n3] >> n4`                                                                                                                |                                              `flow += new_node`<br>`flow -= old_node`                                               |
 | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="Complex Connection"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="Supervisor Agent"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="Runtime Management"> |
 
-### 🔄 **Runtime Node Management**
+### 🔄 Runtime Node Management
 
 ```python
 # Add/Remove nodes at runtime
@@ -105,40 +112,17 @@ a - b - c      # Symmetrically disconnect
 - Parallel Flow: `pf = ParallelFlow(); pf[n1, n2, n3]` (Execute child nodes concurrently)
 - Human Review: CLI/API intervention with `hitl`
 
-### 🔄 Workflow Management
-
-- **Dynamic Workflows**: Modify flows during runtime.
-- **Visualize Changes**: Immediate mermaid diagram updates.
-- **Save & Share**: Export workflows as images or JSON.
-
 ### 📦 Installation
 
 ```bash
 pip install agnflow
 ```
 
-### 📚 Documentation
-
-Visit our [documentation](https://jianduo1.github.io/agnflow/) for:
-
-- Detailed tutorials and examples
-- API reference
-- Best practices
-- Advanced usage
-
-### 🤝 Contributing
-
-We welcome contributions! Please feel free to submit a Pull Request.
-
-### 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ---
 
 # 中文文档
 
-### ⚡ **快速开始 - 极简语法**
+### 1. ⚡ 快速开始 - 极简语法
 
 ```python
 from typing import TypedDict
@@ -150,8 +134,8 @@ class State(TypedDict):
 
 # 定义节点
 start = Node(
-  name="start", 
-  exec=lambda s: ("process", {"message": "Hello"}) # 实例化 Node，指定 exec 
+  name="start",
+  exec=lambda s: ("process", {"message": "Hello"}) # 实例化 Node，指定 exec
 )
 class ProcessNode(Node): # 继承 Node，重写 exec
   def exec(state: State):
@@ -168,7 +152,14 @@ state: State = {"message": ""}
 flow.run(state)  # 输出: {'message': 'Hello World'}
 ```
 
-### 🧠 **静态Web聊天室体验 - 访问后端接口 http://127.0.0.1:8000/zh **
+### 2. 🤖 静态 Web 聊天室体验 - 访问后端接口 http://127.0.0.1:8000/zh
+
+```python
+from agnflow.chatbot.server import Server
+
+server = Server()
+server.run()
+```
 
 <div align="center">
   <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">
@@ -179,7 +170,7 @@ flow.run(state)  # 输出: {'message': 'Hello World'}
   <em>🧠 结构化推理，每一步都有清晰的思考过程 | 💻 智能代码生成，提供详细解释</em>
 </div>
 
-### 🎨 **自动可视化流程图**
+### 3. 🎨 **自动可视化流程图**
 
 ```python
 flow.render_mermaid(saved_file="flow.png")  # 直接生成图片
@@ -190,7 +181,7 @@ flow.render_mermaid(saved_file="flow.png")  # 直接生成图片
 |                                           `n1 >> [n2 >> n3, n3 >> n4] >> n5`                                            | `s1[n1, n2, n3] >> n4`                                                                                                          |                                          `flow += new_node`<br>`flow -= old_node`                                           |
 | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/node_mermaid.png" height="150" alt="复杂连接"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/supervisor_mermaid.png" height="150" alt="蜂群智能体"> | <img src="https://raw.githubusercontent.com/jianduo1/agnflow/main/assets/swarm_mermaid3.png" height="150" alt="运行期管理"> |
 
-### 🔄 **运行期动态节点管理**
+### 4. 🔄 运行期动态节点管理
 
 ```python
 # 运行期增删节点
@@ -202,7 +193,7 @@ a >> b >> c    # 建立连接
 a - b - c      # 对称断开
 ```
 
-### 🚀 高级流程控制
+### 5. 🚀 高级流程控制
 
 - 同步/异步混合: `n = Node(exec=sync_func, aexec=async_func)`
 - 分支/循环: `n1 >> [n2, n3] >> n1`（n1 指向 n2 和 n3，n2 和 n3 指向 n1）
@@ -210,38 +201,37 @@ a - b - c      # 对称断开
 - 并行工作流: `pf = ParallelFlow(); pf[n1, n2, n3]`（并发执行多个子节点）
 - 人工审核: CLI/API 介入 `hitl`
 
-### 🔄 工作流管理
-
-- **动态工作流**: 运行时修改工作流。
-- **可视化更改**: 即时更新流程图。
-- **保存与分享**: 导出工作流为图片或 JSON。
-
-### 📦 安装
+### 6. 📦 安装
 
 ```bash
 pip install agnflow
 ```
 
-### 📚 文档
+---
+
+# 📚 学习文档 Documentation
 
 访问我们的[文档](https://jianduo1.github.io/agnflow/)获取：
+Visit our [documentation](https://jianduo1.github.io/agnflow/) for:
 
-- 详细教程和示例
-- API 参考
-- 最佳实践
-- 高级用法
+- 详细教程和示例 Detailed tutorials and examples
+- API 参考 API reference
+- 最佳实践 Best practices
+- 高级用法 Advanced usage
 
-### 🤝 贡献
+# 🤝 贡献 Contributing
 
 我们欢迎贡献！请随时提交 Pull Request。
+We welcome contributions! Please feel free to submit a Pull Request.
 
-### 📄 许可证
+# 📄 许可证 License
 
 本项目基于 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-### 📞 联系方式与社区
+# 📞 联系方式与社区
 
 <div align="center">
   <p><strong>💬 加入我们的社区，参与讨论、提问和协作！</strong></p>
