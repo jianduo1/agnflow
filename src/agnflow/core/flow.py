@@ -1,19 +1,21 @@
-from typing import Any, Dict, Self, TypeVar
+from typing import Any, Dict,  TypeVar, Callable
+from typing_extensions import Self
 import traceback
 
 from agnflow.core.connection import Connection
 from agnflow.core.node import Node
-
-do_nothing = lambda *x: ...
-log_zh = print
-log = do_nothing
+from agnflow.utils.pprint import pprint
 
 StateType = TypeVar("StateType", bound=dict)
+
+
 class Flow(Connection[StateType]):
     """工作流容器"""
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: str = None, log: Callable = None, log_zh: Callable = None):
         super().__init__(name=name)
+        self.log = log or (lambda *x: ...)
+        self.log_zh = log_zh or pprint
 
     def __getitem__(self, node: "Connection | tuple | list | slice") -> Self:
         """重载运算符 []
@@ -160,8 +162,8 @@ class Flow(Connection[StateType]):
         step = 0
 
         while current_node and step < remaining_steps:
-            log(f"\n🔵 Executing node: {current_node} (Remaining steps: {remaining_steps - step})")
-            log_zh(f"\n🔵 执行节点: {current_node} (剩余步数: {remaining_steps - step})")
+            self.log(f"\n🔵 Executing node: {current_node} (Remaining steps: {remaining_steps - step})")
+            self.log_zh(f"\n🔵 执行节点: {current_node} (剩余步数: {remaining_steps - step})")
 
             # ⭐️ 执行当前节点
             try:
@@ -220,10 +222,10 @@ class Flow(Connection[StateType]):
         # 1. 优先使用 self.connections[self][entry_action]
         if entry_action and self in self.conntainer and entry_action in [i.name for i in self.conntainer[self]]:
             start_node = next(i for i in self.conntainer[self] if i.name == entry_action)
-            log(
+            self.log(
                 f"🟢 {self.name}{self.conntainer[self]} selects entry node: {start_node} based on entry_action: '{entry_action}'"
             )
-            log_zh(
+            self.log_zh(
                 f"🟢 {self.name}{self.conntainer[self]} 根据 entry_action: '{entry_action}' 选择入口节点: {start_node}"
             )
             return start_node
@@ -231,13 +233,13 @@ class Flow(Connection[StateType]):
         # 2. 其次使用 container[self][0]
         if self in self.conntainer and self.conntainer[self]:
             start_node = self.conntainer[self][0]
-            log(f"🟢 {self.name}{self.conntainer[self]} selects entry node: {start_node} as the first node")
-            log_zh(f"🟢 {self.name}{self.conntainer[self]} 第一个节点作为起始节点: {start_node}")
+            self.log(f"🟢 {self.name}{self.conntainer[self]} selects entry node: {start_node} as the first node")
+            self.log_zh(f"🟢 {self.name}{self.conntainer[self]} 第一个节点作为起始节点: {start_node}")
             return start_node
 
         # 3. 都没有就返回 None（对应 exit）
-        log(f"🛑 No start node found, exiting normally")
-        log_zh("🛑 没有找到起始节点，正常退出")
+        self.log(f"🛑 No start node found, exiting normally")
+        self.log_zh("🛑 没有找到起始节点，正常退出")
         return None
 
     def _get_next_node(self, current_node: Connection, action: str = None) -> Connection | None:
@@ -252,13 +254,13 @@ class Flow(Connection[StateType]):
             targets = self.all_connections[current_node]
             if action in targets:
                 tgt = targets[action]
-                log(f"🔵 transfer to the next node: {tgt} 🚀")
-                log_zh(f"🔵 流转下一个节点: {tgt}")
+                self.log(f"🔵 transfer to the next node: {tgt} 🚀")
+                self.log_zh(f"🔵 流转下一个节点: {tgt}")
                 return tgt
 
         # 如果没有找到下一个节点，返回 None（对应 exit）
-        log(f"\n🛑 Node {current_node} with action '{action}' did not find the next node, exiting normally")
-        log_zh(f"\n🛑 节点 {current_node} 的 action '{action}' 没有找到下一个节点，正常退出")
+        self.log(f"\n🛑 Node {current_node} with action '{action}' did not find the next node, exiting normally")
+        self.log_zh(f"\n🛑 节点 {current_node} 的 action '{action}' 没有找到下一个节点，正常退出")
         return None
 
     # endregion
@@ -367,10 +369,10 @@ class Swarm(Flow):
         for n in node:
             if n not in conntainer:
                 conntainer.append(n)
-        
+
         # 显式连接：节点全互连
         super().__getitem__(slice(conntainer, conntainer))
-        
+
         # 隐式连接
         for i in conntainer:
             for j in conntainer:

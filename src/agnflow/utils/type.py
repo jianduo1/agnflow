@@ -1,7 +1,5 @@
 from typing import (
     Any,
-    NotRequired,
-    Required,
     Literal,
     Union,
     Optional,
@@ -10,9 +8,11 @@ from typing import (
     get_type_hints,
     is_typeddict,
 )
+from typing_extensions import NotRequired, Required
 from types import UnionType, NoneType
 
-log = print
+# log = print
+log = lambda *arg: ...
 
 
 def check_type(obj, type_) -> bool:
@@ -95,8 +95,8 @@ def check_type(obj, type_) -> bool:
     if not O and is_typeddict(type_):
         try:
             annotations = get_type_hints(type_)
-            required_keys = getattr(type_, "__required_keys__", set())
-            optional_keys = getattr(type_, "__optional_keys__", set())
+            required_keys = [k for k in annotations if annotations[k] is Required]
+            optional_keys = [k for k in annotations if annotations[k] is NotRequired]
             total = getattr(type_, "__total__", True)
             # 检查必需字段
             for field in required_keys:
@@ -155,17 +155,31 @@ def check_type(obj, type_) -> bool:
 if __name__ == "__main__":
     from typing import TypedDict
 
-    print(check_type([("a", {"b": tuple()})], list[tuple[str, dict[str, tuple]]]))
-    print(check_type(None, type(None)))
+    # print(check_type([("a", {"b": tuple()})], list[tuple[str, dict[str, tuple]]]))
+    # print(check_type(None, type(None)))
 
-    print(check_type(None, NotRequired[int])) # type: ignore
-    print(check_type(None, Required[int])) # type: ignore
-    print(check_type(None, Optional[int]))
+    # print(check_type(None, NotRequired[int])) # type: ignore
+    # print(check_type(None, Required[int])) # type: ignore
+    # print(check_type(None, Optional[int]))
+    class C(TypedDict):
+        n: int
+    class B(TypedDict):
+        n: int
+        t: NotRequired[list[C]]
 
     class A(TypedDict, total=False):
-        a: int
-        b: NotRequired[str]
+        n: int
+        b: NotRequired[list[B]]
 
-    print(check_type({"a": 1}, A))
-    print(check_type({"a":1,"b":"2"}, A))
-    print(check_type({"a":1,"b":"2","c":3}, A))
+    # print(check_type({"a": 1}, A))
+    # print(check_type({"a":1,"b":[]}, A))
+    # print(check_type({"a": 1, "b": [{"n": 2}]}, A))
+    
+    from agnflow.agent.cot import Plan
+    data = [
+        {"description": "定义智能体CoT", "status": "Pending"},
+        {"description": "查找CoT相关资料", "status": "Pending"},
+        {"description": "分析CoT的核心特征", "status": "Pending"},
+        {"description": "结论", "status": "Pending"},
+    ]
+    print(check_type(data, NotRequired[list[Plan]])) # type: ignore

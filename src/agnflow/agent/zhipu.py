@@ -8,7 +8,7 @@ API
 - 向量与嵌入: embeddings
 - 知识与工具: knowledge, tools
 - 检索与搜索: web_search
-- 微调: fine_tuning
+- 微调: fine_tunin
 - 内容安全: moderations
 
 TODO
@@ -544,12 +544,15 @@ def pprint(*values, stream=False):
 
 if __name__ == "__main__":
     ...
-    # 🚀 同步调用 流式输出 异步调用
+    # 🚀 问答
+    # 同步调用
     response = zhipu_chat(messages=msg_texts["智能写作"], mode="sync")
     print(response)
+    # 流式输出
     genertor = zhipu_chat(messages=msg_texts["实体抽取"], mode="stream")
     for chunk in genertor():
         pprint(chunk, stream=True)
+    # 异步调用
     wait_for_result = zhipu_chat(messages=msg_texts["智能翻译"], mode="async")
     print(wait_for_result())
 
@@ -576,24 +579,24 @@ if __name__ == "__main__":
     response = zhipu_chat(messages=msg_images["视觉推理"], model="vision-thinking")
     print(response)
 
-    # 🎤 音频问答 同步
+    # 🎤 音频问答
+    # 同步
     msg = AudioMsg("您好", "assets/hello.mp3")
     response = zhipu_chat(messages=msg, model="glm-4-voice", save_file="assets/output2.wav")
     print(response)
-
-    # 🎤 音频问答 流式
+    # 流式
     msg = AudioMsg(url="assets/voice/hello.mp3")
     generator = zhipu_chat(messages=msg, model="glm-4-voice", save_file="assets/output3-{i}.wav", mode="stream")
     for chunk in generator():
         pprint(chunk, stream=True)
 
-    # 🎤 音频转文字 同步
+    # 🎤 音频转文字
+    # 同步
     response = zhipu_audio(file="assets/voice/hello.mp3", model="glm-asr")
     print(response)
-
-    # 🎤 音频转文字 流式
+    #  流式
     generator = zhipu_audio(file="assets/voice/hello.mp3", model="glm-asr", stream=True)
-    for chunk in generator():
+    for chunk in generator(): 
         pprint(chunk, stream=True)
 
     # 🎥 视频生成
