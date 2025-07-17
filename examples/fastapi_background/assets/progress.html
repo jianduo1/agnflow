@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generating Article...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .topic-title {
+            color: #374151;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        .progress-container {
+            margin: 30px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-text {
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .progress-percentage {
+            color: #374151;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .status-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .status-title {
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-content {
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #e5e7eb;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 1;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .step-circle.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .step-circle.completed {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            text-align: center;
+            max-width: 80px;
+        }
+
+        .result-section {
+            display: none;
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .article-content {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            line-height: 1.6;
+            color: #374151;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .step-indicator {
+                margin: 20px 0;
+            }
+            
+            .step-label {
+                font-size: 0.7rem;
+                max-width: 60px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">✨ Article AI</div>
+        <div class="topic-title" id="topicTitle">Generating your article...</div>
+        
+        <div class="progress-container">
+            <div class="progress-percentage" id="progressPercentage">0%</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Initializing...</div>
+        </div>
+
+        <div class="step-indicator">
+            <div class="step">
+                <div class="step-circle" id="step1">1</div>
+                <div class="step-label">Outline</div>
+            </div>
+            <div class="step">
+                <div class="step-circle" id="step2">2</div>
+                <div class="step-label">Content</div>
+            </div>
+            <div class="step">
+                <div class="step-circle" id="step3">3</div>
+                <div class="step-label">Style</div>
+            </div>
+        </div>
+
+        <div class="status-card" id="statusCard">
+            <div class="status-title" id="statusTitle">
+                <span class="spinner"></span>
+                Getting started...
+            </div>
+            <div class="status-content" id="statusContent">
+                Preparing to generate your article. This may take a few moments.
+            </div>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <h3 style="margin-bottom: 15px; color: #374151;">Your Article is Ready! 🎉</h3>
+            <div class="article-content" id="articleContent"></div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="copyToClipboard()">Copy Article</button>
+                <a href="/" class="btn btn-secondary">Generate Another</a>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage" style="display: none;"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const jobId = urlParams.get('job_id');
+        const topic = urlParams.get('topic');
+
+        if (topic) {
+            document.getElementById('topicTitle').textContent = `"${topic}"`;
+        }
+
+        if (!jobId) {
+            showError('No job ID provided');
+        } else {
+            connectToProgress();
+        }
+
+        function connectToProgress() {
+            const eventSource = new EventSource(`/progress/${jobId}`);
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleProgressUpdate(data);
+                } catch (error) {
+                    console.error('Error parsing SSE data:', error);
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.error('SSE connection error:', error);
+                showError('Connection lost. Please refresh the page.');
+                eventSource.close();
+            };
+        }
+
+        function handleProgressUpdate(data) {
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+
+            if (data.heartbeat) {
+                return; // Ignore heartbeat messages
+            }
+
+            const progress = data.progress || 0;
+            updateProgress(progress);
+
+            switch (data.step) {
+                case 'connected':
+                    updateStatus('🔗 Connected', 'Successfully connected to the article generation process.');
+                    break;
+                    
+                case 'outline':
+                    updateStepIndicator(1);
+                    if (data.data && data.data.sections) {
+                        updateStatus('📝 Creating Outline', `Generated outline with ${data.data.sections.length} sections`);
+                    } else {
+                        updateStatus('📝 Creating Outline', 'Generating article structure and main points...');
+                    }
+                    break;
+                    
+                case 'content':
+                    updateStepIndicator(2);
+                    if (data.data && data.data.section) {
+                        updateStatus('✍️ Writing Content', 
+                            `Writing section: "${data.data.section}" (${data.data.completed_sections}/${data.data.total_sections})`);
+                    } else {
+                        updateStatus('✍️ Writing Content', 'Creating detailed content for each section...');
+                    }
+                    break;
+                    
+                case 'style':
+                    updateStepIndicator(3);
+                    updateStatus('🎨 Applying Style', 'Polishing the article with engaging, conversational tone...');
+                    break;
+                    
+                case 'complete':
+                    updateStepIndicator(3, true);
+                    updateProgress(100);
+                    updateStatus('✅ Complete!', 'Your article has been generated successfully.');
+                    if (data.data && data.data.final_article) {
+                        showResult(data.data.final_article);
+                    }
+                    break;
+            }
+        }
+
+        function updateProgress(percentage) {
+            document.getElementById('progressPercentage').textContent = `${percentage}%`;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+        }
+
+        function updateStatus(title, content) {
+            document.getElementById('statusTitle').innerHTML = `<span class="spinner"></span> ${title}`;
+            document.getElementById('statusContent').textContent = content;
+        }
+
+        function updateStepIndicator(step, completed = false) {
+            // Reset all steps
+            for (let i = 1; i <= 3; i++) {
+                const stepElement = document.getElementById(`step${i}`);
+                stepElement.className = 'step-circle';
+                if (i < step) {
+                    stepElement.classList.add('completed');
+                    stepElement.innerHTML = '✓';
+                } else if (i === step) {
+                    stepElement.classList.add(completed ? 'completed' : 'active');
+                    stepElement.innerHTML = completed ? '✓' : i;
+                } else {
+                    stepElement.innerHTML = i;
+                }
+            }
+        }
+
+        function showResult(article) {
+            document.getElementById('statusCard').style.display = 'none';
+            document.getElementById('articleContent').textContent = article;
+            document.getElementById('resultSection').classList.add('show');
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('statusCard').style.display = 'none';
+        }
+
+        function copyToClipboard() {
+            const article = document.getElementById('articleContent').textContent;
+            navigator.clipboard.writeText(article).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#10b981';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+    </script>
+</body>
+</html> 
