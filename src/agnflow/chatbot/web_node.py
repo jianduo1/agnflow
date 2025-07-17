@@ -103,6 +103,10 @@ class WebNode(Node[StateType], Generic[StateType]):
                     # 处理文件类型
                     if base_type is IO or (hasattr(base_type, "__name__") and base_type.__name__ == "IO"):
                         field_type = "file"
+                    # 处理 bool 类型，强制为 checkbox
+                    if base_type is bool:
+                        field_type = "checkbox"
+                        options = None
             
             # 处理非 Annotated 的 Literal 类型
             elif origin is Literal:
@@ -112,6 +116,10 @@ class WebNode(Node[StateType], Generic[StateType]):
             # 处理非 Annotated 的文件类型
             elif typ is IO or (hasattr(typ, "__name__") and typ.__name__ == "IO"):
                 field_type = "file"
+            # 处理 bool 类型，强制为 checkbox
+            elif typ is bool:
+                field_type = "checkbox"
+                options = None
 
             # 允许通过 default 传递 options
             default = param.default if param.default is not inspect.Parameter.empty else None

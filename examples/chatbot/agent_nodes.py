@@ -208,7 +208,7 @@ class VisionNode(WebNode):
                 "社交媒体内容生成": "根据图片内容创作一篇吸引人的社交媒体文案。",
             }.get(qt, "对图像进行详细描述。")
             # 拼接用户输入内容
-            user_content = self.state.get("content")
+            user_content = self.state.get("user_message")
             if user_content:
                 image_message = f"{image_message}\n用户补充说明：{user_content}"
             msg = {
@@ -234,6 +234,108 @@ class VisionNode(WebNode):
         except Exception as e:
             error_msg = f"处理图片时发生错误: {str(e)}"
             print(f"❌ 错误: {error_msg}")
+            await self.send_text(type="error", content=error_msg)
+        finally:
+            await self.send_text(type="end", content="")
+
+
+class ImageNode(WebNode):
+    """🖼️ 图片生成（文生图）"""
+
+    async def aexec(
+        self,
+        prompt: A[textarea, "图片描述/提示词"] = "生成狗狗图片",
+        model: A[
+            Literal["cogview-3-flash", "cogview-4", "cogview-4-250304"], "图片生成模型"
+        ] = "cogview-3-flash",
+    ):
+        """
+        图片生成节点 - 根据用户输入的描述生成图片，流式返回图片链接，并转为<img>标签保存
+        """
+        conversation = self.state.get("conversation")
+        await self.send_text(type="start", content="")
+        try:
+            if not prompt.strip():
+                # 兜底遍历 state
+                candidates = [v.strip() for v in self.state.values() if isinstance(v, str) and v.strip()]
+                if candidates:
+                    prompt = max(candidates, key=len)
+            if not prompt.strip():
+                print("ImageNode state:", self.state)
+                raise ValueError("请输入图片描述/提示词")
+            # 1. 发送用户输入到会话历史
+            user_message = self.state.get("user_message") or ""
+            await self.save_message(conversation=conversation, role="user", content=user_message)
+            # 2. 调用zhipu_image生成图片
+            img_url = zhipu_image(prompt=prompt, model=model)
+            img_tag = f'<img src="{img_url}" alt="AI生成图片" style="max-width:100%;">'
+            # 3. 流式推送图片链接和img标签
+            await self.send_text(type="chunk", content=img_tag)
+            # 4. 保存AI回复（img标签）
+            await self.save_message(conversation=conversation, role="assistant", content=img_tag)
+        except Exception as e:
+            error_msg = f"图片生成时发生错误: {str(e)}"
+            print(error_msg)
+            await self.send_text(type="error", content=error_msg)
+        finally:
+            await self.send_text(type="end", content="")
+
+
+class VideoNode(WebNode):
+    """🎥 视频生成"""
+
+    async def aexec(
+        self,
+        prompt: A[textarea, "视频描述/提示词"] = "生成猫猫视频",
+        image_url: A[str, "可选图片URL（图生视频）"] = "",
+        model: A[
+            Literal["cogvideox-flash", "cogvideox-2"], "视频生成模型"
+        ] = "cogvideox-flash",
+        quality: A[Literal["quality", "speed"], "输出模式"] = "quality",
+        with_audio: A[bool, "是否包含音频"] = True,
+        size: A[str, "分辨率，如1920x1080"] = "1920x1080",
+        fps: A[int, "帧率"] = 30,
+    ):
+        """
+        视频生成节点 - 支持文生视频和图生视频，流式返回视频链接并转为<video>标签保存
+        """
+        conversation = self.state.get("conversation")
+        await self.send_text(type="start", content="")
+        try:
+            if not prompt.strip():
+                print("VideoNode state:", self.state)
+                raise ValueError("请输入视频描述/提示词")
+            # 1. 发送用户输入到会话历史
+            # 2. 调用zhipu_video生成视频（异步任务，需等待结果）
+            wait_for_result = zhipu_video(prompt=prompt, image_url=image_url, model=model, quality=quality, with_audio=with_audio, size=size, fps=fps)
+            video_obj = wait_for_result()
+            # 智谱API返回VideoObject，需提取url
+            video_url = None
+            if isinstance(video_obj, dict):
+                # 兼容dict结构
+                video_results = video_obj.get('video_result') or video_obj.get('video_results')
+                if video_results and isinstance(video_results, list) and len(video_results) > 0:
+                    video_url = video_results[0].get('url')
+            else:
+                # 兼容对象结构
+                video_results = getattr(video_obj, 'video_result', None) or getattr(video_obj, 'video_results', None)
+                if video_results and isinstance(video_results, list) and len(video_results) > 0:
+                    video_url = getattr(video_results[0], 'url', None)
+            if not video_url:
+                video_url = str(video_obj)  # 兜底，防止出错
+            video_tag = f'<video src="{video_url}" controls style="max-width:100%"></video>'
+            # 如果image_url是图片链接，追加img标签用于展示
+            if image_url and isinstance(image_url, str) and image_url.startswith("http"):
+                video_tag += f'<br><img src="{image_url}" alt="图生视频图片" style="max-width:180px;max-height:180px;border-radius:6px;margin:4px 0;" />'
+            # 3. 流式推送视频链接和video标签
+            await self.send_text(type="chunk", content=video_tag)
+            # 4. 保存AI回复（video标签）
+            user_message = self.state.get("user_message") or ""
+            await self.save_message(conversation=conversation, role="user", content=user_message)
+            await self.save_message(conversation=conversation, role="assistant", content=video_tag)
+        except Exception as e:
+            error_msg = f"视频生成时发生错误: {str(e)}"
+            print(error_msg)
             await self.send_text(type="error", content=error_msg)
         finally:
             await self.send_text(type="end", content="")
