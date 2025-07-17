@@ -1,10 +1,8 @@
 [project]
 name = "agnflow"
 version = "0.1.4"
-description = "一个简洁的 Python 智能体工作流引擎，支持同步与异步节点、分支、循环、流程图渲染。"
-authors = [
-    { name = "jianduo1", email = "jianduo1@gmail.com" }
-]
+description = "AI Agent Workflow Engine"
+requires-python = ">=3.11"
 dependencies = [
     "openai>=1.0.0",
     "duckduckgo-search>=4.0.0",
@@ -28,74 +26,15 @@ dependencies = [
     "redis>=6.2.0",
     "pydub>=0.25.1",
     "aiosqlite>=0.21.0",
-    "langchain-qwq>=0.2.0",
-]
-readme = "README.md"
-requires-python = ">=3.10,<3.11"
-keywords = ["workflow", "agent", "llm", "async", "python", "automation", "human-in-the-loop"]
-classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: System :: Distributed Computing",
+    "aiohttp>=3.12.14",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "flake8>=6.0.0",
-    "build>=1.2.2.post1",
-    "twine>=6.1.0",
-    "mkdocs-material>=9.6.14",
-    "mkdocs-git-revision-date-localized-plugin>=1.4.7",
-    "mkdocs-minify-plugin>=0.8.0",
-    "granian>=2.0.0"
-]
-ai = [
-    "sentence-transformers>=2.2.0"
-]
-
-[project.urls]
-Homepage = "https://github.com/jianduo1/agnflow"
-Documentation = "https://github.com/jianduo1/agnflow/tree/main/docs"
-Repository = "https://github.com/jianduo1/agnflow.git"
-Issues = "https://github.com/jianduo1/agnflow/issues"
-Changelog = "https://github.com/jianduo1/agnflow/releases"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.hatch.metadata]
-allow-direct-references = true
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/agnflow"]
-
 [tool.uv]
 dev-dependencies = [
-    "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0",
-    "black>=23.0.0",
-    "isort>=5.12.0",
-    "flake8>=6.0.0",
-    "build>=1.2.2.post1",
-    "twine>=6.1.0",
-    "mkdocs-material>=9.6.14",
-    "mkdocs-git-revision-date-localized-plugin>=1.4.7",
-    "mkdocs-minify-plugin>=0.8.0",
-    "granian>=2.0.0"
+    "langchain-qwq>=0.2.0",
 ]
+index-url = "https://pypi.tuna.tsinghua.edu.cn/simple/"

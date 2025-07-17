@@ -1,12 +1,16 @@
+"""
+继承关系
+ChatNode/VisionNode -> WebNode -> Node -> Connection
+"""
+
 import json
 import asyncio
 from xmltodict import parse
 
-from agnflow.chatbot.type import ChatState, Tool
+from agnflow.chatbot.type import ChatOptions, Tool
 from agnflow.core import Node
-from agnflow.agent.llm import stream_llm, SysMsg, UserMsg, get_tool_prompt, prompt_format, tool_map
-from agnflow.chatbot.chatbot_db import chat_db
-
+from agnflow.agent.llm import AiMsg, stream_llm, SysMsg, UserMsg, get_tool_prompt, prompt_format, tool_map
+from agnflow.chatbot.web_node import WebNode
 
 md = str
 
@@ -65,93 +69,103 @@ tool_system_prompt: md = """
 
 """
 
-class ChatNode(Node):
+
+class ChatNode(WebNode):
     """流式对话节点"""
 
-    async def aexec(self, state: "ChatState"):
-        conversation = state.get("conversation", "")
-        user_message = state.get("user_message", "")
-        websocket = state.get("websocket")
-        options = state.get("options", {})
-        tool_map = state.get("tool_map", {})
+    async def aexec(
+        self,
+        conversation: str = "",
+        user_message: str = "",
+        options: ChatOptions = {},
+        tool_map: dict = {},
+        tool_context: dict = {},
+        messages: list = [],
+    ):
+        # 📮 发送开始消息
+        await self.send_text(type="start", content="")
+        try:
+            # 获取会话相关信息
+            messages += UserMsg(user_message)  # 添加本轮用户消息
+            tool_xml = ""  # 工具调用的XML片段缓存
+            full_response = ""  # AI完整回复内容
 
-        tool_context = state.get("tool_context", {})
-        messages = state.get("messages", [])
-        messages.append({"role": "user", "content": user_message})
-        tool_xml = ""
-        full_response = ""
-        # 🔴发送开始消息
-        await websocket.send_text(json.dumps({"type": "start", "content": ""}))
+            # 🟢根据选项添加系统提示
+            if options.get("reasoning", False):
+                # 推理模式，添加推理系统提示
+                messages = SysMsg(reasoning_system_prompt) + UserMsg(messages)
+            elif options.get("toolCall", False):
+                # 工具调用模式，拼接工具系统提示
+                tools = get_tool_prompt(*tool_map.values())
+                prompt: str = prompt_format(prompt=tool_system_prompt, tools=tools, state_context=tool_context)
+                messages = SysMsg(prompt) + UserMsg(messages)
+            else:
+                # 普通对话模式
+                messages = UserMsg(messages)
 
-        # 🟢根据选项添加系统提示
-        if options.get("reasoning", False):
-            messages = SysMsg(reasoning_system_prompt) + UserMsg(messages)
-        elif options.get("toolCall", False):
-            prompt = prompt_format(
-                prompt=tool_system_prompt,
-                tools=get_tool_prompt(*tool_map.values()),
-                state_context=tool_context,
-            )
-            messages = SysMsg(prompt) + UserMsg(messages)
-        else:
-            messages = UserMsg(messages)
+            # 🔄流式获取LLM回复
+            async for chunk_content in stream_llm(messages):
+                full_response += chunk_content  # 累加完整回复
 
-        async for chunk_content in stream_llm(messages):
-            full_response += chunk_content
-
-            # 🔵解析工具调用
-            tool_xml += chunk_content
-            if "<tool>" in tool_xml:
-                tool_xml = tool_xml[tool_xml.index("<tool>") :]
-            if "</tool>" in tool_xml:
-                tool_xml = tool_xml[: tool_xml.index("</tool>") + len("</tool>")]
-                tool_dict = parse(tool_xml)
-                tool: Tool = tool_dict.get("tool", {})
-                name = tool.get("name")
-                args = tool.get("args", {})
-                set_state = tool.get("set_state", "")
-                for k, v in args.items():
-                    # args = {"b": {"get_state": "result1"}}
-                    if isinstance(v, dict) and v.get("get_state"):
-                        _v = v.get("get_state", "").strip()
-                        args[k] = tool_context.get(_v)
-                # pprint(tool_dict)
-                if name in tool_map:
-                    tool_func = tool_map[name]
+                # 🔵解析工具调用（如有）
+                tool_xml += chunk_content  # 拼接XML片段
+                if "<tool>" in tool_xml:
+                    # 只保留最后一个<tool>标签之后的内容
+                    tool_xml = tool_xml[tool_xml.index("<tool>") :]
+                if "</tool>" in tool_xml:
+                    # 截取完整的<tool>...</tool>片段
+                    tool_xml = tool_xml[: tool_xml.index("</tool>") + len("</tool>")]
+                    tool_dict = parse(tool_xml)  # 解析XML为字典
+                    tool: Tool = tool_dict.get("tool", {})
+                    name = tool.get("name")  # 工具名
+                    args = tool.get("args", {})  # 工具参数
+                    set_state = tool.get("set_state", "")  # 工具结果存储变量名
                     for k, v in args.items():
-                        if tool_func.__annotations__.get(k):
-                            # 工具参数类型注解 tool_func.__annotations__[k] : typing.Annotated[int, '乘数']
-                            typ = tool_func.__annotations__[k].__args__[0]
-                            args[k] = typ(v)
+                        # 处理参数中引用状态变量的情况
+                        if isinstance(v, dict) and v.get("get_state"):
+                            _v = v.get("get_state", "").strip()
+                            args[k] = tool_context.get(_v)
+                    # 检查工具是否存在
+                    if name in tool_map:
+                        tool_func = tool_map[name]
+                        for k, v in args.items():
+                            # 工具参数类型转换（根据注解）
+                            if tool_func.__annotations__.get(k):
+                                typ = tool_func.__annotations__[k].__args__[0]
+                                args[k] = typ(v)
+                            else:
+                                print(f"工具 {name} 参数 {k} 未找到注解")
+                                raise ValueError(f"工具 {name} 参数 {k} 未找到注解")
+                        # 支持同步/异步工具
+                        if asyncio.iscoroutinefunction(tool_func):
+                            result = await tool_func(**args)
                         else:
-                            print(f"工具 {name} 参数 {k} 未找到注解")
-                            raise ValueError(f"工具 {name} 参数 {k} 未找到注解")
-                    # 支持同步异步
-                    if asyncio.iscoroutinefunction(tool_func):
-                        result = await tool_func(**args)
+                            result = tool_func(**args)
+                        # 工具结果存入上下文
+                        if set_state:
+                            tool_context[set_state] = result
                     else:
-                        result = tool_func(**args)
-                    if set_state:
-                        tool_context[set_state] = result
-                else:
-                    print(f"工具 {name} 未找到")
-                tool_xml = ""
+                        print(f"工具 {name} 未找到")
+                    tool_xml = ""  # 清空XML缓存
 
-            # 🔴发送中间消息
-            await websocket.send_text(json.dumps({"type": "chunk", "content": chunk_content}))
+                # 📮 发送中间消息（流式推送给前端）
+                await self.send_text(type="chunk", content=chunk_content)
 
-        # 🔴发送工具上下文消息
-        if tool_context:
-            chunk_content = f"<tool_context>{json.dumps(tool_context)}</tool_context>"
-            full_response += chunk_content
-            await websocket.send_text(json.dumps({"type": "chunk", "content": chunk_content}))
+            # 📮 发送工具上下文消息（如有工具调用结果）
+            if tool_context:
+                chunk_content = f"<tool_context>{json.dumps(tool_context)}</tool_context>"
+                full_response += chunk_content
+                await self.send_text(type="chunk", content=chunk_content)
 
-        # 🔴发送结束消息
-        await websocket.send_text(json.dumps({"type": "end", "content": ""}))
+            # 更新消息历史
+            messages += AiMsg(full_response)
+            self.set_state("messages", messages)
 
-        messages.append({"role": "assistant", "content": full_response})
-        state["messages"] = messages
-
-        # 保存聊天记录到数据库（新结构：分别插入 user/ai）
-        await chat_db.save_message(conversation, "user", user_message)
-        await chat_db.save_message(conversation, "ai", full_response)
+            # 保存聊天记录到数据库（新结构：分别插入 user/ai）
+            await self.save_message(conversation=conversation, role="user", content=user_message)
+            await self.save_message(conversation=conversation, role="ai", content=full_response)
+        except Exception as e:
+            print(f"📮 发生错误: {e}")
+        finally:
+            # 📮 发送结束消息
+            await self.send_text(type="end", content="")

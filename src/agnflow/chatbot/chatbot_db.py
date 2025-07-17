@@ -1,3 +1,4 @@
+import os
 from typing import Any, List, Optional, Tuple, Literal, TypedDict
 import aiosqlite
 import uuid
@@ -14,9 +15,9 @@ class Chat(TypedDict):
 class ChatbotDB:
     """聊天记录数据库"""
 
-    def __init__(self, db_path: str = "chatbot.sqlite3") -> None:
+    def __init__(self, db_path: str = None) -> None:
         """初始化数据库"""
-        self.db_path: str = db_path
+        self.db_path: str = db_path or os.getenv("CHATBOT_DB_PATH", "chatbot.sqlite3")
 
     async def _execute(
         self, sql: str, params: Tuple = (), action: Literal["fetchone", "fetchall", "update"] = "fetchall"
@@ -88,4 +89,3 @@ if __name__ == "__main__":
         print(chat_db.get_all_messages())
 
     asyncio.run(main())
-

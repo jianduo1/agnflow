@@ -1,11 +1,10 @@
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Generic
 import asyncio, time, inspect
 
 from agnflow.core.connection import Connection
+from agnflow.core.type import StateType
 
-StateType = TypeVar("StateType", bound=dict)
-
-class Node(Connection[StateType]):
+class Node(Connection[StateType], Generic[StateType]):
     """节点 - 工作流的基本执行单元"""
 
     def __init__(self, name: str = None, exec: Callable = None, aexec: Callable = None, max_retries=1, wait=0):
@@ -15,6 +14,7 @@ class Node(Connection[StateType]):
         self.max_retries = max_retries
         self.wait = wait
         self.cur_retry = 0
+        self.state: StateType = {}
 
     def __getitem__(self, key):
         raise NotImplementedError("Node 类不支持 __getitem__ 方法")
@@ -33,6 +33,8 @@ class Node(Connection[StateType]):
 
         # ⭐️ 执行重试机制
         for self.cur_retry in range(self.max_retries):
+            # ⭐️ 设置节点状态 配合 get_state/set_state 使用
+            self.state: StateType = state
             try:
                 # ⭐️ 调用自定义或者默认执行器（exec/aexec），根据 is_async 选择同步/异步
                 if is_async:
@@ -51,6 +53,8 @@ class Node(Connection[StateType]):
                         await asyncio.sleep(self.wait)
                     else:
                         time.sleep(self.wait)
+            finally:
+                self.state: StateType = {}
 
     def _call_with_params(self, executor: Callable, instance: Any, state: StateType) -> Any:
         """根据函数签名智能调用执行器
@@ -74,7 +78,6 @@ class Node(Connection[StateType]):
 
         # 构建调用参数
         call_kwargs = {}
-
         for param_name, param in params.items():
             if param_name == "self":
                 call_kwargs[param_name] = instance
@@ -92,6 +95,14 @@ class Node(Connection[StateType]):
                 call_kwargs[param_name] = state
 
         return executor(**call_kwargs)
+
+    def set_state(self, name: str, value: Any):
+        """设置节点状态"""
+        self.state[name] = value
+
+    def get_state(self, name: str = None, default: Any = None) -> Any:
+        """获取节点状态"""
+        return self.state.get(name, default)
 
     # endregion
 

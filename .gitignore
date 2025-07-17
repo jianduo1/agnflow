@@ -72,3 +72,5 @@ logs/
 # UV
 .uv/
 uv.lock
+
+.VSCodeCounter

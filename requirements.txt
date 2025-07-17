@@ -19,4 +19,4 @@ websockets>=15.0.1
 xmltodict>=0.14.2
 redis>=6.2.0
 pydub>=0.25.1
-aiosqlite>=0.21.0 
+aiosqlite>=0.21.0

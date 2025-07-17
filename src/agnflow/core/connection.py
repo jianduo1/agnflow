@@ -1,11 +1,10 @@
-from typing import Any, Dict, Literal, TypeVar, Generic
+from typing import Any, Dict, Literal, Generic
 import asyncio
 from pathlib import Path
 import re
 
 from agnflow.utils.code import get_code_line
-
-StateType = TypeVar("StateType", bound=dict)
+from agnflow.core.type import StateType
 
 class Connection(Generic[StateType]):
     """连接关系（节点与容器）

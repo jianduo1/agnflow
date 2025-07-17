@@ -11,7 +11,7 @@
   <em>支持同步/异步节点、分支循环、可视化流程图 | 快速搭建 Agent 任务流</em>
   <br>
   
-  [![Star](https://img.shields.io/github/stars/jianduo1/agnflow?style=social)](https://github.com/jianduo1/agnflow) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://jianduo1.github.io/agnflow/) [![PyPI](https://img.shields.io/badge/pypi-v0.1.4-blue.svg)](https://pypi.org/project/agnflow/) [![Downloads](https://img.shields.io/pypi/dm/agnflow)](https://pypi.org/project/agnflow/) [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/) [![Discord](https://img.shields.io/badge/Discord-Chat-7289DA?style=flat&logo=discord&logoColor=white)](https://discord.com/channels/1388482307769237584/1388482308222357556)
+  [![Star](https://img.shields.io/github/stars/jianduo1/agnflow?style=social)](https://github.com/jianduo1/agnflow) [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://jianduo1.github.io/agnflow/) [![PyPI](https://img.shields.io/badge/pypi-v0.1.4-blue.svg)](https://pypi.org/project/agnflow/) [![Downloads](https://img.shields.io/pypi/dm/agnflow)](https://pypi.org/project/agnflow/) [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/) [![Discord](https://img.shields.io/badge/Discord-Chat-7289DA?style=flat&logo=discord&logoColor=white)](https://discord.com/channels/1388482307769237584/1388482308222357556) [![Frontend-AgnChat](https://img.shields.io/badge/frontend-AgnChat-ff69b4)](https://github.com/jianduo1/agnchat)
 </div>
 
 <div align="center">
@@ -211,7 +211,7 @@ pip install agnflow
 
 # 📚 学习文档 Documentation
 
-访问我们的[文档](https://jianduo1.github.io/agnflow/)获取：
+访问我们的[文档](https://jianduo1.github.io/agnflow/)获取：<br>
 Visit our [documentation](https://jianduo1.github.io/agnflow/) for:
 
 - 详细教程和示例 Detailed tutorials and examples
@@ -221,12 +221,12 @@ Visit our [documentation](https://jianduo1.github.io/agnflow/) for:
 
 # 🤝 贡献 Contributing
 
-我们欢迎贡献！请随时提交 Pull Request。
+我们欢迎贡献！请随时提交 Pull Request。<br>
 We welcome contributions! Please feel free to submit a Pull Request.
 
 # 📄 许可证 License
 
-本项目基于 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+本项目基于 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。<br>
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
